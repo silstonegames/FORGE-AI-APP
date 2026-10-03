@@ -1,0 +1,3060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#16143A">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Forge</title>
+<style>
+:root{
+  --ink:#16143A;--paper:#ECEAF8;--panel:#FFFFFF;--yellow:#FFCB2E;--coral:#FF5A6E;--blue:#3D4BFF;
+  --bd:3px solid var(--ink);
+  --disp:"sans-serif-black","Arial Black",Impact,system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Droid Sans Mono",monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--paper)}
+body{color:var(--ink);font:16px/1.45 var(--body);overscroll-behavior:none;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+h2,h3{font-family:var(--disp);font-weight:900;letter-spacing:-.5px;margin:0 0 8px;line-height:1.15}
+h2{font-size:22px}h3{font-size:18px;margin-top:22px}
+p{margin:0 0 10px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+#app{height:100vh;height:100dvh;max-width:760px;margin:0 auto;display:flex;flex-direction:column;background:var(--paper)}
+#top{flex:none;display:flex;align-items:center;justify-content:space-between;padding:calc(8px + env(safe-area-inset-top)) 14px 10px}
+.brand{font:900 32px/1 var(--disp);letter-spacing:-1.5px}
+.tone{flex:none;height:10px;border-top:var(--bd);border-bottom:var(--bd);background-color:var(--yellow);background-image:radial-gradient(var(--ink) 1.2px,transparent 1.5px);background-size:6px 6px}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.btn,.iconbtn{border:var(--bd);border-radius:12px;background:var(--panel);font-weight:800;box-shadow:3px 3px 0 var(--ink);cursor:pointer}
+.btn{min-height:48px;padding:0 18px}
+.iconbtn{width:48px;height:48px;display:flex;align-items:center;justify-content:center;padding:0}
+.btn:active,.iconbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.btn.primary{background:var(--yellow)}
+.btn.warn{background:var(--coral)}
+.btn.small{min-height:40px;padding:0 14px;font-size:14px}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.5;box-shadow:none;transform:none}
+
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:8px 16px;border:2px solid var(--ink);border-radius:999px;background:var(--panel);font-weight:700;text-align:left;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--paper)}
+
+.field{margin:0 0 16px}
+.field>label,.lbl{display:block;font-weight:800;margin:0 0 6px}
+textarea,input[type=text],input[type=password],select{width:100%;border:var(--bd);border-radius:8px;background:#fff;padding:12px;font-size:16px;line-height:1.4}
+textarea{resize:vertical;min-height:96px}
+.note{font-size:14px;margin:6px 0 0;opacity:.8}
+.check{display:flex;align-items:center;gap:10px;font-weight:800;min-height:44px}
+.check input{width:24px;height:24px;accent-color:var(--ink);flex:none}
+.rowbtn{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.opts{display:flex;gap:12px;align-items:flex-start}
+.opts .field{margin-bottom:12px}
+.opts .grow{flex:1 1 200px;min-width:0}
+.opts #acodeWrap{flex:0 1 150px}
+
+#views{flex:1;min-height:0;position:relative}
+.view{position:absolute;top:0;right:0;bottom:0;left:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding:16px 14px 28px}
+.view.on{display:block}
+#v-chat{padding:0;overflow:hidden}
+#v-chat.on{display:flex;flex-direction:column}
+.bar{flex:none;display:flex;gap:10px;align-items:center;padding:12px 14px 4px}
+.bar select{flex:1;min-height:44px;padding:8px 10px}
+#chatlog{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 6px}
+
+#tabs{flex:none;display:flex;border-top:var(--bd);background:var(--panel);padding-bottom:env(safe-area-inset-bottom)}
+#tabs button{flex:1;min-height:62px;border:0;border-right:3px solid var(--ink);background:transparent;font-weight:800;font-size:13px;line-height:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer}
+#tabs button:last-child{border-right:0}
+#tabs button.on{background:var(--yellow)}
+
+.msg{display:flex;margin:0 0 20px}
+.msg.user{justify-content:flex-end}
+.col{max-width:92%;min-width:0;display:flex;flex-direction:column}
+.msg.user .col{align-items:flex-end}
+.balloon{position:relative;min-width:0;max-width:100%;padding:11px 14px;border:var(--bd);border-radius:18px;background:var(--panel);overflow-wrap:anywhere}
+.msg.ai .balloon{border-bottom-left-radius:4px}
+.msg.user .balloon{background:var(--yellow);border-bottom-right-radius:4px}
+.balloon:after{content:"";position:absolute;bottom:-10px;width:14px;height:14px;background:inherit;border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);transform:rotate(45deg)}
+.msg.ai .balloon:after{left:16px}
+.msg.user .balloon:after{right:16px}
+.balloon p{margin:0 0 .65em}.balloon p:last-child{margin:0}
+.balloon code{font:.9em var(--mono);background:rgba(22,20,58,.09);padding:1px 5px;border-radius:4px}
+.balloon .err,.err{border-left:5px solid var(--coral);padding-left:10px;font-weight:600}
+.codewrap{margin:.6em 0;max-width:100%;border-radius:6px;overflow:hidden;background:var(--ink)}
+.codewrap pre.code{border-radius:0}
+pre.code{margin:0;padding:12px;background:var(--ink);color:#F1EEFF;border-radius:6px;overflow:auto;font:13px/1.5 var(--mono);white-space:pre;-webkit-user-select:text;user-select:text}
+.copy{display:block;margin:6px 6px 0 auto;min-height:36px;padding:0 12px;border:2px solid #F1EEFF;border-radius:8px;background:transparent;color:#F1EEFF;font-weight:800;font-size:13px;cursor:pointer}
+.dots{display:inline-flex;gap:5px;align-items:center;height:22px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--ink);animation:bob 1s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes bob{0%,80%,100%{transform:translateY(0);opacity:.35}40%{transform:translateY(-5px);opacity:1}}
+
+.act{margin-top:16px;padding:12px;border:var(--bd);border-radius:4px;background:var(--panel);box-shadow:4px 4px 0 var(--ink)}
+.act-t{font-weight:800;font-size:14px;margin-bottom:4px}
+.act-p{font-size:15px;overflow-wrap:anywhere}
+
+#composer{flex:none;padding:10px 12px calc(10px + 0px);border-top:var(--bd);background:var(--panel)}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:0 0 10px;padding-bottom:2px}
+.chips .chip{flex:none;min-height:40px;padding:6px 14px;font-size:14px}
+.row{display:flex;gap:10px;align-items:flex-end}
+#chatIn{flex:1;min-height:52px;max-height:32vh;resize:none;padding:13px 12px}
+#chatSend{width:56px;height:52px;padding:0;display:flex;align-items:center;justify-content:center;flex:none}
+#chatSend .ico-stop{display:none}#chatSend.busy .ico-stop{display:block}#chatSend.busy .ico-send{display:none}#chatSend.busy{background:var(--coral)}
+
+.empty{position:relative;overflow:hidden;padding:20px 16px 26px;border:var(--bd);border-radius:4px;background:var(--panel);box-shadow:4px 4px 0 var(--ink);margin:4px 0 18px}
+.empty:after{content:"";position:absolute;right:0;bottom:0;width:96px;height:64px;background-image:radial-gradient(var(--ink) 1.2px,transparent 1.5px);background-size:6px 6px;opacity:.22;pointer-events:none}
+.empty .seg{position:relative;z-index:1}
+
+.gallery{display:grid;grid-template-columns:1fr;gap:18px;margin-top:22px;align-items:start}
+@media (min-width:560px){.gallery{grid-template-columns:1fr 1fr}}
+.panel{border:var(--bd);border-radius:4px;background:var(--panel);box-shadow:4px 4px 0 var(--ink);overflow:hidden;min-width:0;scroll-margin-top:12px}
+.panel.wide{grid-column:1/-1}
+.panel img,.panel video{display:block;width:100%;height:auto;background:var(--ink)}
+.panel .cap{padding:8px 10px;font-size:13px;border-top:var(--bd);max-height:3.4em;overflow:hidden}
+.pbtns{display:flex;border-top:var(--bd)}
+.pbtns button{flex:1;min-height:46px;border:0;border-right:3px solid var(--ink);background:var(--panel);font-weight:800;font-size:14px;cursor:pointer}
+.pbtns button:last-child{border-right:0}
+.pbtns button:active,.pbtns button.hot{background:var(--yellow)}
+.jobbody{padding:14px}
+.jobbody p{margin:8px 0 0}
+.stripe{height:14px;border:var(--bd);border-radius:4px;margin-top:10px;background:repeating-linear-gradient(45deg,var(--yellow),var(--yellow) 10px,var(--panel) 10px,var(--panel) 20px);background-size:28px 28px;animation:slide 1s linear infinite}
+@keyframes slide{to{background-position:28px 0}}
+@keyframes slam{from{transform:scale(1.07) rotate(-1.2deg);opacity:0}to{transform:none;opacity:1}}
+.slam{animation:slam .18s ease-out}
+.startbox{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px;border:var(--bd);border-radius:8px;background:#fff}
+.startbox img{width:64px;height:64px;object-fit:cover;border:2px solid var(--ink);border-radius:4px}
+.startbox span{flex:1;min-width:120px}
+
+.files{display:flex;gap:8px;overflow-x:auto;padding:10px;border-bottom:var(--bd)}
+.notes{padding:10px 12px;font-size:14px;border-top:var(--bd)}
+.netout{display:none;margin:12px 0 0;padding:10px;background:var(--ink);color:#F1EEFF;border-radius:6px;font:13px/1.5 var(--mono);white-space:pre-wrap}
+.netout.on{display:block}
+.card{border:var(--bd);border-radius:4px;background:var(--panel);box-shadow:4px 4px 0 var(--ink);padding:14px;margin:0 0 20px}
+details{margin:6px 0 20px}
+summary{min-height:48px;display:flex;align-items:center;padding:0 14px;border:var(--bd);border-radius:8px;background:var(--panel);font-weight:800;cursor:pointer}
+details[open] summary{margin-bottom:14px}
+.files .chip{flex:none;min-height:40px;padding:6px 14px;font-size:14px}
+pre.codeview{max-height:52vh;border-radius:0}
+pre.stream{max-height:34vh;border-radius:0}
+.saved{margin-top:26px}
+.saved .panel{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:14px}
+.saved .ttl{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}
+.saved .ttl small{display:block;font-weight:500;opacity:.75}
+
+.sheet{position:fixed;top:0;right:0;bottom:0;left:0;z-index:50;display:none;background:var(--paper);overflow-y:auto}
+.sheet.on{display:flex}
+.sheet-in{width:100%;max-width:760px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 14px 44px}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.sheet-h h2{margin:0}
+.ask{background:rgba(22,20,58,.55);align-items:flex-end;z-index:100}
+.ask .sheet-in{background:var(--panel);border-top:var(--bd);padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+
+.pv{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:none;flex-direction:column;background:var(--ink)}
+.pv.on{display:flex}
+.pv-h{flex:none;display:flex;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:var(--paper);border-bottom:var(--bd)}
+.pv-err{display:none;flex:none;padding:10px 12px;background:var(--coral);border-bottom:var(--bd);font-weight:700}
+.pv-err.on{display:block}
+#pvFrame{flex:1;width:100%;border:0;background:#fff}
+
+#toast{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:736px;margin:0 auto;z-index:90;display:none;padding:12px 14px;border:var(--bd);border-radius:8px;background:var(--ink);color:#fff;font-weight:700;box-shadow:4px 4px 0 var(--yellow)}
+#toast.on{display:block}
+
+.rn{position:fixed;top:0;right:0;bottom:0;left:0;z-index:65;display:none;flex-direction:column;background:#000}
+.rn.on{display:flex}
+.rn-h{flex:none;display:flex;gap:8px;flex-wrap:wrap;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:var(--paper);border-bottom:var(--bd)}
+.rn-t{flex:none;padding:6px 12px;background:var(--paper);border-bottom:var(--bd);font-weight:800;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rnHost{flex:1;min-height:0;position:relative;background:#000}
+#rnHost iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;background:#000}
+.rn-load{position:absolute;top:0;right:0;bottom:0;left:0;z-index:2;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;line-height:1.5;color:#fff;font-weight:700;background:#000}
+.rn-log{display:none;flex:none;max-height:38%;margin:0;overflow:auto;padding:8px 10px;background:var(--ink);color:#F1EEFF;font:12px/1.5 var(--mono);white-space:pre-wrap;border-top:var(--bd);-webkit-user-select:text;user-select:text}
+.rn-log.on{display:block}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="top">
+    <div class="brand">Forge</div>
+    <button id="btnSettings" class="iconbtn" type="button" aria-label="Settings">
+      <svg class="i" viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></svg>
+    </button>
+  </header>
+  <div class="tone"></div>
+
+  <main id="views">
+    <section id="v-chat" class="view on">
+      <div class="bar">
+        <select id="chatProv" aria-label="Chat model"></select>
+        <button id="chatNew" class="btn small" type="button">New chat</button>
+      </div>
+      <div id="chatlog"></div>
+      <div id="composer">
+        <div class="chips">
+          <button class="chip" type="button" data-go="image">Make image</button>
+          <button class="chip" type="button" data-go="video">Make video</button>
+          <button class="chip" type="button" data-go="build">Build game</button>
+        </div>
+        <div class="row">
+          <textarea id="chatIn" rows="1" placeholder="Ask, or say what to make" aria-label="Message"></textarea>
+          <button id="chatSend" class="btn primary" type="button" aria-label="Send">
+            <svg class="i ico-send" viewBox="0 0 24 24"><path d="M4 12L20 4l-5 16-3-7z"/></svg>
+            <svg class="i ico-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="v-image" class="view">
+      <div class="field">
+        <label for="imgPrompt">What should it show?</label>
+        <textarea id="imgPrompt" rows="4" placeholder="A paper crane gliding over a neon canyon at dusk, cel-shaded, wide shot"></textarea>
+        <div class="rowbtn"><button id="imgImprove" class="btn small" type="button">Improve prompt</button></div>
+      </div>
+      <div class="field">
+        <span class="lbl">Shape</span>
+        <div class="seg" id="imgShape">
+          <button class="chip on" type="button" data-v="square">Square</button>
+          <button class="chip" type="button" data-v="portrait">Portrait</button>
+          <button class="chip" type="button" data-v="landscape">Landscape</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="imgProv">Made with</label>
+        <select id="imgProv"></select>
+      </div>
+      <button id="imgGo" class="btn primary block" type="button">Make image</button>
+      <div id="imgOut">
+        <div class="empty" style="margin-top:22px"><h2>Nothing drawn yet.</h2><p>Describe a scene, pick a shape, and tap Make image. Images stay here until you close the app, so save the ones you want.</p></div>
+      </div>
+    </section>
+
+    <section id="v-video" class="view">
+      <div class="field">
+        <label for="vidPrompt">What happens?</label>
+        <textarea id="vidPrompt" rows="4" placeholder="A paper crane lifts off a rooftop at sunrise. Slow crane shot pulls back to reveal the city waking up."></textarea>
+        <div class="rowbtn"><button id="vidImprove" class="btn small" type="button">Improve prompt</button></div>
+      </div>
+      <div class="field">
+        <span class="lbl">Shape</span>
+        <div class="seg" id="vidShape">
+          <button class="chip on" type="button" data-v="16:9">Wide 16:9</button>
+          <button class="chip" type="button" data-v="9:16">Vertical 9:16</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="vidProv">Made with</label>
+        <select id="vidProv"></select>
+      </div>
+      <div class="field" id="vidLenWrap">
+        <span class="lbl">Length</span>
+        <div class="seg" id="vidLen">
+          <button class="chip on" type="button" data-v="4">4 seconds</button>
+          <button class="chip" type="button" data-v="6">6 seconds</button>
+          <button class="chip" type="button" data-v="8">8 seconds</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl">First frame (optional)</span>
+        <div class="startbox" id="vidStart"></div>
+        <input id="vidFile" type="file" accept="image/*" hidden>
+      </div>
+      <button id="vidGo" class="btn primary block" type="button">Make video</button>
+      <p class="note" id="vidNote"></p>
+      <div id="vidOut">
+        <div class="empty" style="margin-top:22px"><h2>No clips yet.</h2><p>Video takes a few minutes and costs more than images. Save each clip when it finishes, since clips are cleared when you close the app.</p></div>
+      </div>
+    </section>
+
+    <section id="v-build" class="view">
+      <div class="field">
+        <span class="lbl">Make it for</span>
+        <div class="seg" id="tgtChips"></div>
+        <p class="note" id="tgtNote"></p>
+      </div>
+      <div class="field">
+        <label for="bldPrompt" id="bldLabel">What should it do?</label>
+        <textarea id="bldPrompt" rows="4" placeholder="A one-button runner where a paper crane dodges storm clouds. Tap to flap. Score at the top."></textarea>
+      </div>
+      <div class="opts">
+        <div class="field grow"><label for="bldProv">Written by</label><select id="bldProv"></select></div>
+        <div class="field grow" id="acodeWrap">
+          <label class="check"><input type="checkbox" id="acodeSafe" checked> Acode-safe</label>
+          <p class="note" style="margin-top:0">Plain ES5, one file, no CDN.</p>
+        </div>
+      </div>
+      <div class="field" id="maxWrap">
+        <label class="check"><input type="checkbox" id="maxEffort"> Max effort</label>
+        <p class="note" style="margin-top:0">Plans the design, writes the files, then reviews and fixes them. Uses more of your credit.</p>
+      </div>
+      <div class="rowbtn" style="margin-top:0">
+        <button id="bldGo" class="btn primary" type="button">Build it</button>
+        <button id="bldReset" class="btn" type="button">Start over</button>
+      </div>
+      <div id="bldOut" style="margin-top:22px">
+        <div class="empty"><h2>Describe it, then play it.</h2><p>Web builds run right here. Godot, Unity, Unreal, and Blender builds give you the scripts and project files to open in that tool.</p></div>
+      </div>
+      <div id="bldSaved" class="saved"></div>
+    </section>
+
+    <section id="v-play" class="view">
+      <div class="field">
+        <span class="lbl">What did you make it with?</span>
+        <div class="seg" id="engChips"></div>
+        <p class="note" id="engNote"></p>
+      </div>
+      <div class="field" id="engFileWrap">
+        <span class="lbl" id="engFileLbl">Project</span>
+        <div class="startbox" id="engFileBox"></div>
+        <input id="engFile" type="file" hidden>
+      </div>
+      <button id="engRun" class="btn primary block" type="button">Run project</button>
+      <div class="card" id="engHelp" style="margin-top:22px"></div>
+      <div id="playSaved" class="saved" style="margin-top:8px"></div>
+    </section>
+  </main>
+
+  <nav id="tabs" aria-label="Sections">
+    <button id="t-chat" class="on" type="button" data-go="chat"><svg class="i" viewBox="0 0 24 24"><path d="M4 5h16v11H10l-5 4v-4H4z"/></svg>Chat</button>
+    <button id="t-image" type="button" data-go="image"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="9" cy="10" r="1.7"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>Images</button>
+    <button id="t-video" type="button" data-go="video"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="1"/><path d="M16 10.5l5-2.5v8l-5-2.5z"/></svg>Video</button>
+    <button id="t-build" type="button" data-go="build"><svg class="i" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>Build</button>
+    <button id="t-play" type="button" data-go="play"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>Play</button>
+  </nav>
+</div>
+
+<div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Settings">
+  <div class="sheet-in">
+    <div class="sheet-h"><h2>Settings</h2><button id="setClose" class="btn small" type="button">Close</button></div>
+
+    <div class="card">
+      <h3 style="margin-top:0">Free AI, no API keys</h3>
+      <p>Forge runs Claude, GPT, and Gemini through a free Puter account, so you never need a key. Puter gives each account a free monthly allowance, and big models and video use it up faster. Your prompts go through Puter's servers to reach the models.</p>
+      <p class="note" id="puterStatus" style="margin-top:0"></p>
+      <div class="rowbtn">
+        <button id="puterSignIn" class="btn primary" type="button">Sign in to Puter (free)</button>
+        <button id="puterSignOut" class="btn" type="button">Sign out</button>
+        <button id="puterTest" class="btn" type="button">Test connection</button>
+      </div>
+      <pre id="puterNet" class="netout"></pre>
+    </div>
+
+    <div class="field"><label for="s-puterExtraModel">Extra Puter model (optional)</label><input id="s-puterExtraModel" type="text" list="dl-puter" autocomplete="off" autocapitalize="off" spellcheck="false"><p class="note">Any model id from Puter's catalog. It appears in the model pickers.</p></div>
+    <div class="field"><label for="s-puterImageModel">Image model</label><input id="s-puterImageModel" type="text" list="dl-pimg" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+    <div class="field"><label for="s-puterVideoModel">Video model</label><input id="s-puterVideoModel" type="text" list="dl-pvid" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+
+    <details>
+      <summary>Advanced: use your own API keys</summary>
+      <p class="note">Optional. Only needed if you would rather bill Anthropic, OpenAI, or Google directly. Keys stay in this browser and go only to the company you pick.</p>
+
+      <h3>Claude</h3>
+      <div class="field"><label for="s-anthropicKey">Anthropic API key</label><input id="s-anthropicKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="s-anthropicModel">Model</label><input id="s-anthropicModel" type="text" list="dl-claude" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+
+      <h3>OpenAI</h3>
+      <div class="field"><label for="s-openaiKey">OpenAI API key</label><input id="s-openaiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="s-openaiChatModel">Chat model</label><input id="s-openaiChatModel" type="text" list="dl-gpt" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="s-openaiImageModel">Image model</label><input id="s-openaiImageModel" type="text" list="dl-oimg" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+
+      <h3>Google</h3>
+      <div class="field"><label for="s-googleKey">Google AI key (video and images)</label><input id="s-googleKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="s-googleVideoModel">Video model</label><input id="s-googleVideoModel" type="text" list="dl-veo" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="s-googleImageModel">Image model</label><input id="s-googleImageModel" type="text" list="dl-gimg" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+
+      <label class="check"><input type="checkbox" id="s-show"> Show keys</label>
+    </details>
+
+    <div class="rowbtn">
+      <button id="setSave" class="btn primary" type="button">Save settings</button>
+      <button id="setWipe" class="btn warn" type="button">Erase all Forge data</button>
+    </div>
+    <datalist id="dl-claude"><option value="claude-fable-5-1"><option value="claude-opus-5"><option value="claude-sonnet-5"><option value="claude-haiku-4-5-20251001"></datalist>
+    <datalist id="dl-gpt"><option value="gpt-5.5"><option value="gpt-5.5-pro"><option value="gpt-5.4-mini"><option value="gpt-5.4-nano"></datalist>
+    <datalist id="dl-oimg"><option value="gpt-image-2"></datalist>
+    <datalist id="dl-veo"><option value="veo-3.1-generate-preview"></datalist>
+    <datalist id="dl-gimg"><option value="imagen-4.0-generate-001"></datalist>
+    <datalist id="dl-puter"><option value="claude-fable-5-1"><option value="claude-opus-5"><option value="claude-opus-5-fast"><option value="claude-sonnet-5"><option value="claude-haiku-4-5"><option value="openai/gpt-5.5"><option value="openai/gpt-5.4-nano"><option value="google/gemini-3.8-flash"></datalist>
+    <datalist id="dl-pimg"><option value="gpt-image-2"><option value="gpt-image-2.5-flare"><option value="gpt-image-1-mini"><option value="gemini-3.1-flash-image-preview"></datalist>
+    <datalist id="dl-pvid"><option value="veo-3.1-lite"><option value="veo-3.1-fast"><option value="veo-3.1"><option value="seedance-2-0-mini"></datalist>
+  </div>
+</div>
+
+<div id="ask" class="sheet ask" role="dialog" aria-modal="true">
+  <div class="sheet-in">
+    <h2 id="askT"></h2>
+    <p id="askB"></p>
+    <div class="rowbtn"><button id="askNo" class="btn" type="button">Cancel</button><button id="askYes" class="btn primary" type="button"></button></div>
+  </div>
+</div>
+
+<div id="pv" class="pv" role="dialog" aria-modal="true" aria-label="Preview">
+  <div class="pv-h"><button id="pvClose" class="btn small primary" type="button">Close</button><button id="pvReload" class="btn small" type="button">Restart</button></div>
+  <div id="pvErr" class="pv-err"><div id="pvMsg"></div><div class="rowbtn"><button id="pvFix" class="btn small primary" type="button">Ask AI to fix</button><button id="pvDismiss" class="btn small" type="button">Dismiss</button></div></div>
+  <iframe id="pvFrame" sandbox="allow-scripts" title="Preview"></iframe>
+</div>
+
+<div id="rn" class="rn" role="dialog" aria-modal="true" aria-label="Project player">
+  <div class="rn-h">
+    <button id="rnClose" class="btn small primary" type="button">Close</button>
+    <button id="rnRestart" class="btn small" type="button">Restart</button>
+    <button id="rnLogBtn" class="btn small" type="button">Log</button>
+    <button id="rnFull" class="btn small" type="button" aria-label="Full screen"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+  <div id="rnTitle" class="rn-t"></div>
+  <div id="rnHint" class="pv-err"><div id="rnHintMsg"></div><div class="rowbtn"><button id="rnHintX" class="btn small" type="button">Dismiss</button></div></div>
+  <div id="rnHost"><div id="rnLoad" class="rn-load">Loading…</div></div>
+  <pre id="rnLog" class="rn-log"></pre>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script id="srcShim" type="text/plain">
+(function () {
+  'use strict';
+  if (window.__vfs) { return; }
+  var VFS = { files: {}, lower: {}, byBase: {}, base: '' };
+  window.__vfs = VFS;
+
+  function post(o) { try { parent.postMessage(o, '*'); } catch (e) {} }
+
+  /* ---- console and error forwarding ---- */
+  var logCount = 0, LOGMAX = 800;
+  function fmt(args) {
+    var out = [];
+    for (var i = 0; i < args.length; i++) {
+      var a = args[i], t;
+      if (typeof a === 'string') { t = a; }
+      else if (a instanceof Error) { t = a.stack || a.message; }
+      else { try { t = JSON.stringify(a); } catch (e) { t = String(a); } }
+      out.push(t);
+    }
+    var s = out.join(' ');
+    return s.length > 600 ? s.substring(0, 600) + '...' : s;
+  }
+  function log(level, text) { if (logCount++ < LOGMAX) { post({ forge: 'log', level: level, text: text }); } }
+  ['log', 'info', 'warn', 'error', 'debug'].forEach(function (lv) {
+    var orig = console[lv];
+    console[lv] = function () {
+      try { log(lv, fmt(arguments)); } catch (e) {}
+      return orig.apply(console, arguments);
+    };
+  });
+  window.__forgeHandlers = function () {
+    window.addEventListener('error', function (e) {
+      if (e.target && e.target !== window && (e.target.src || e.target.href)) {
+        log('error', 'Could not load ' + (e.target.src || e.target.href));
+        return;
+      }
+      post({ forge: 'err', msg: String(e.message || 'Error') + (e.lineno ? ' (line ' + e.lineno + ')' : '') });
+    }, true);
+    window.addEventListener('unhandledrejection', function (e) {
+      post({ forge: 'err', msg: String(e.reason && e.reason.message ? e.reason.message : e.reason) });
+    });
+  };
+
+  /* ---- paths and mime types ---- */
+  var MIME = {
+    html: 'text/html', htm: 'text/html', js: 'text/javascript', mjs: 'text/javascript', css: 'text/css', json: 'application/json',
+    png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml', ico: 'image/x-icon',
+    wasm: 'application/wasm', mp3: 'audio/mpeg', ogg: 'audio/ogg', wav: 'audio/wav', m4a: 'audio/mp4', mp4: 'video/mp4', webm: 'video/webm',
+    woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', otf: 'font/otf', txt: 'text/plain', xml: 'application/xml',
+    glb: 'model/gltf-binary', gltf: 'model/gltf+json', bin: 'application/octet-stream', pck: 'application/octet-stream', data: 'application/octet-stream'
+  };
+  function extOf(p) { var m = /\.([a-z0-9]+)$/i.exec(p); return m ? m[1].toLowerCase() : ''; }
+  function stripComp(p) { return p.replace(/\.(gz|br|unityweb)$/i, ''); }
+  function mimeOf(p) { return MIME[extOf(stripComp(p))] || 'application/octet-stream'; }
+  function norm(p) {
+    p = String(p).split('#')[0].split('?')[0].replace(/\\/g, '/');
+    try { p = decodeURIComponent(p); } catch (e) {}
+    var segs = p.split('/'), out = [];
+    for (var i = 0; i < segs.length; i++) {
+      if (segs[i] === '' || segs[i] === '.') { continue; }
+      if (segs[i] === '..') { out.pop(); } else { out.push(segs[i]); }
+    }
+    return out.join('/');
+  }
+  function dirOf(p) { var i = p.lastIndexOf('/'); return i < 0 ? '' : p.substring(0, i); }
+  function isExternal(u) { return /^([a-z][a-z0-9+.\-]*:|\/\/)/i.test(u); }
+
+  function addFile(path, buf) {
+    var key = norm(path);
+    if (!key) { return; }
+    var rec = { path: key, buf: buf, type: mimeOf(key), url: null, err: null, cssDone: false };
+    VFS.files[key] = rec;
+    VFS.lower[key.toLowerCase()] = rec;
+    var b = key.split('/').pop().toLowerCase();
+    (VFS.byBase[b] = VFS.byBase[b] || []).push(rec);
+  }
+  function exact(key) { return VFS.files[key] || VFS.lower[key.toLowerCase()] || null; }
+  function fuzzy(key) {
+    var segs = key.toLowerCase().split('/'), c = VFS.byBase[segs[segs.length - 1]];
+    if (!c || !c.length) { return null; }
+    if (c.length === 1) { return c[0]; }
+    var best = null, bestN = -1;
+    for (var i = 0; i < c.length; i++) {
+      var ps = c[i].path.toLowerCase().split('/'), n = 0;
+      while (n < segs.length && n < ps.length && segs[segs.length - 1 - n] === ps[ps.length - 1 - n]) { n++; }
+      if (n > bestN) { bestN = n; best = c[i]; }
+    }
+    return best;
+  }
+  /* find a file for a URL written in code or markup, relative to folder dir */
+  function resolve(dir, u) {
+    if (typeof u !== 'string' || !u || isExternal(u)) { return null; }
+    if (u.charAt(0) === '/') { var k0 = norm(u); return k0 ? (exact(k0) || fuzzy(k0)) : null; }
+    var rel = norm((dir ? dir + '/' : '') + u), root = norm(u);
+    return exact(rel) || (root ? exact(root) : null) || (root ? fuzzy(root) : null);
+  }
+  function lookup(u) { return resolve(VFS.base, u); }
+
+  /* ---- unpacking compressed files and building blob URLs ---- */
+  function gunzip(buf) {
+    return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+  }
+  function prepare() {
+    var jobs = [];
+    Object.keys(VFS.files).forEach(function (k) {
+      var rec = VFS.files[k];
+      if (/\.br$/i.test(k)) {
+        rec.err = 'This build is Brotli compressed and cannot be unpacked here. Build it again with compression turned off or set to Gzip.';
+        return;
+      }
+      if (/\.(gz|unityweb)$/i.test(k) && rec.buf.byteLength > 2) {
+        var h = new Uint8Array(rec.buf, 0, 2);
+        if (h[0] === 0x1f && h[1] === 0x8b) {
+          if (typeof DecompressionStream === 'undefined') { rec.err = 'This browser cannot unpack Gzip files. Update Chrome.'; return; }
+          jobs.push(gunzip(rec.buf).then(function (out) { rec.buf = out; }));
+        }
+      }
+    });
+    return Promise.all(jobs);
+  }
+  function blobUrl(rec) {
+    if (rec.url) { return rec.url; }
+    if (/\.css$/i.test(rec.path)) { rewriteCss(rec); }
+    rec.url = URL.createObjectURL(new Blob([rec.buf], { type: rec.type }));
+    return rec.url;
+  }
+  function rewriteCss(rec) {
+    if (rec.cssDone) { return; }
+    rec.cssDone = true;
+    var dir = dirOf(rec.path), text = new TextDecoder('utf-8').decode(rec.buf);
+    function res(u) { var r = resolve(dir, u); return r ? blobUrl(r) : null; }
+    text = text.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g, function (m, q, u) { var b = res(u); return b ? 'url("' + b + '")' : m; });
+    text = text.replace(/@import\s+(['"])([^'"]+)\1/g, function (m, q, u) { var b = res(u); return b ? '@import "' + b + '"' : m; });
+    rec.buf = new TextEncoder().encode(text).buffer;
+  }
+  function mapUrl(v) {
+    if (typeof v !== 'string') { return v; }
+    var r = lookup(v);
+    return r ? blobUrl(r) : v;
+  }
+
+  /* ---- fetch ---- */
+  var realFetch = window.fetch ? window.fetch.bind(window) : null;
+  function respond(rec) {
+    if (rec.err) { return Promise.reject(new TypeError(rec.err)); }
+    return Promise.resolve(new Response(rec.buf, { status: 200, statusText: 'OK', headers: { 'Content-Type': rec.type } }));
+  }
+  window.fetch = function (input, init) {
+    var u = typeof input === 'string' ? input : (input && input.url ? input.url : String(input));
+    var rec = lookup(u);
+    if (rec) { return respond(rec); }
+    if (!realFetch) { return Promise.reject(new TypeError('fetch is not available')); }
+    return realFetch(input, init);
+  };
+
+  /* ---- XMLHttpRequest ---- */
+  var XP = XMLHttpRequest.prototype;
+  var xOpen = XP.open, xSend = XP.send, xSet = XP.setRequestHeader, xAbort = XP.abort, xMime = XP.overrideMimeType;
+  var xGet = XP.getResponseHeader, xAll = XP.getAllResponseHeaders;
+  XP.open = function (method, url) {
+    var rec = lookup(String(url));
+    if (rec) { this.__vf = rec; this.__vurl = String(url); this.__vabort = false; return; }
+    this.__vf = null;
+    return xOpen.apply(this, arguments);
+  };
+  XP.setRequestHeader = function () { if (this.__vf) { return; } return xSet.apply(this, arguments); };
+  XP.overrideMimeType = function () { if (this.__vf) { return; } return xMime.apply(this, arguments); };
+  XP.abort = function () { if (this.__vf) { this.__vabort = true; return; } return xAbort.apply(this, arguments); };
+  XP.getResponseHeader = function (n) {
+    if (this.__vf) { n = String(n).toLowerCase(); return n === 'content-type' ? this.__vf.type : (n === 'content-length' ? String(this.__vf.buf.byteLength) : null); }
+    return xGet.apply(this, arguments);
+  };
+  XP.getAllResponseHeaders = function () {
+    if (this.__vf) { return 'content-type: ' + this.__vf.type + '\r\ncontent-length: ' + this.__vf.buf.byteLength + '\r\n'; }
+    return xAll.apply(this, arguments);
+  };
+  XP.send = function () {
+    var x = this, rec = this.__vf;
+    if (!rec) { return xSend.apply(this, arguments); }
+    var rt = x.responseType || '';
+    function def(name, val) { Object.defineProperty(x, name, { configurable: true, get: function () { return val; } }); }
+    function fire(type, n) {
+      try { x.dispatchEvent(new ProgressEvent(type, { lengthComputable: true, loaded: n || 0, total: n || 0 })); } catch (e) {}
+    }
+    setTimeout(function () {
+      if (x.__vabort) { return; }
+      if (rec.err) {
+        def('readyState', 4); def('status', 0); def('statusText', '');
+        fire('readystatechange'); fire('error'); fire('loadend');
+        return;
+      }
+      var n = rec.buf.byteLength, resp;
+      if (rt === 'arraybuffer') { resp = rec.buf.slice(0); }
+      else if (rt === 'blob') { resp = new Blob([rec.buf], { type: rec.type }); }
+      else {
+        var txt = new TextDecoder('utf-8').decode(rec.buf);
+        if (rt === 'json') { try { resp = JSON.parse(txt); } catch (e) { resp = null; } } else { resp = txt; }
+      }
+      def('readyState', 4); def('status', 200); def('statusText', 'OK'); def('responseURL', x.__vurl); def('response', resp);
+      if (rt === '' || rt === 'text') { def('responseText', typeof resp === 'string' ? resp : ''); }
+      fire('readystatechange', n); fire('progress', n); fire('load', n); fire('loadend', n);
+    }, 0);
+  };
+
+  /* ---- elements that load by URL ---- */
+  function patchSetter(proto, prop) {
+    if (!proto) { return; }
+    var d = Object.getOwnPropertyDescriptor(proto, prop);
+    if (!d || !d.set || !d.configurable) { return; }
+    Object.defineProperty(proto, prop, {
+      configurable: true, enumerable: d.enumerable, get: d.get,
+      set: function (v) { d.set.call(this, mapUrl(v)); }
+    });
+  }
+  patchSetter(window.HTMLImageElement && HTMLImageElement.prototype, 'src');
+  patchSetter(window.HTMLMediaElement && HTMLMediaElement.prototype, 'src');
+  patchSetter(window.HTMLSourceElement && HTMLSourceElement.prototype, 'src');
+  patchSetter(window.HTMLTrackElement && HTMLTrackElement.prototype, 'src');
+  patchSetter(window.HTMLScriptElement && HTMLScriptElement.prototype, 'src');
+  patchSetter(window.HTMLLinkElement && HTMLLinkElement.prototype, 'href');
+  patchSetter(window.HTMLVideoElement && HTMLVideoElement.prototype, 'poster');
+  var realSetAttr = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function (name, value) {
+    if (typeof value === 'string' && /^(src|href|poster)$/i.test(name) && /^(IMG|SCRIPT|AUDIO|VIDEO|SOURCE|TRACK|LINK)$/.test(this.tagName)) { value = mapUrl(value); }
+    return realSetAttr.call(this, name, value);
+  };
+  var RealAudio = window.Audio;
+  if (RealAudio) {
+    window.Audio = function (src) { var a = new RealAudio(); if (src !== undefined) { a.src = src; } return a; };
+    window.Audio.prototype = RealAudio.prototype;
+  }
+  var RealWorker = window.Worker;
+  if (RealWorker) {
+    window.Worker = function (url, opts) { var rec = lookup(String(url)); return new RealWorker(rec ? blobUrl(rec) : url, opts); };
+    window.Worker.prototype = RealWorker.prototype;
+  }
+
+  /* ---- things a sandbox blocks: cookies and web storage ---- */
+  try { Object.defineProperty(Document.prototype, 'cookie', { configurable: true, get: function () { return ''; }, set: function () {} }); } catch (e) {}
+  var saveTimer = 0;
+  function changed() {
+    if (saveTimer) { return; }
+    saveTimer = setTimeout(function () { saveTimer = 0; post({ forge: 'storage', data: LS.dump() }); }, 400);
+  }
+  function makeStorage(onChange) {
+    var data = Object.create(null);
+    var methods = {
+      getItem: function (k) { k = String(k); return k in data ? data[k] : null; },
+      setItem: function (k, v) { data[String(k)] = String(v); onChange(); },
+      removeItem: function (k) { delete data[String(k)]; onChange(); },
+      clear: function () { data = Object.create(null); onChange(); },
+      key: function (i) { return Object.keys(data)[i] || null; }
+    };
+    var proxy = new Proxy(methods, {
+      get: function (t, k) {
+        if (k === 'length') { return Object.keys(data).length; }
+        if (k in t) { return t[k]; }
+        return (typeof k === 'string' && k in data) ? data[k] : undefined;
+      },
+      set: function (t, k, v) { data[String(k)] = String(v); onChange(); return true; },
+      deleteProperty: function (t, k) { delete data[String(k)]; onChange(); return true; },
+      has: function (t, k) { return (k in t) || (k in data); },
+      ownKeys: function () { return Object.keys(data); },
+      getOwnPropertyDescriptor: function (t, k) {
+        return (typeof k === 'string' && k in data) ? { value: data[k], writable: true, enumerable: true, configurable: true } : undefined;
+      }
+    });
+    return {
+      proxy: proxy,
+      load: function (o) { data = Object.create(null); for (var k in o) { data[k] = String(o[k]); } },
+      dump: function () { var c = {}; for (var k in data) { c[k] = data[k]; } return c; }
+    };
+  }
+  var LS = makeStorage(changed), SS = makeStorage(function () {});
+  try { Object.defineProperty(window, 'localStorage', { configurable: true, get: function () { return LS.proxy; } }); } catch (e) {}
+  try { Object.defineProperty(window, 'sessionStorage', { configurable: true, get: function () { return SS.proxy; } }); } catch (e) {}
+
+  /* ---- turn the entry page into a document that points at blob URLs ---- */
+  function buildHtml(entry) {
+    var text = new TextDecoder('utf-8').decode(entry.buf);
+    var doc = new DOMParser().parseFromString(text, 'text/html');
+    var attrs = ['src', 'href', 'poster', 'data-src'];
+    var nodes = doc.querySelectorAll('[src],[href],[poster],[data-src]');
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (n.tagName === 'A' || n.tagName === 'BASE') { continue; }
+      for (var j = 0; j < attrs.length; j++) {
+        if (!n.hasAttribute(attrs[j])) { continue; }
+        var rec = lookup(n.getAttribute(attrs[j]));
+        if (rec) { n.setAttribute(attrs[j], blobUrl(rec)); n.removeAttribute('integrity'); }
+      }
+    }
+    var css = function (s) {
+      return s.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g, function (m, q, u) { var r = lookup(u); return r ? 'url("' + blobUrl(r) + '")' : m; });
+    };
+    var styles = doc.querySelectorAll('style');
+    for (var k = 0; k < styles.length; k++) { styles[k].textContent = css(styles[k].textContent); }
+    var inl = doc.querySelectorAll('[style]');
+    for (var m2 = 0; m2 < inl.length; m2++) { inl[m2].setAttribute('style', css(inl[m2].getAttribute('style'))); }
+    var probe = doc.createElement('script');
+    probe.textContent = 'window.__forgeHandlers&&window.__forgeHandlers();';
+    doc.head.insertBefore(probe, doc.head.firstChild);
+    if (!doc.querySelector('meta[name=viewport]')) {
+      var mv = doc.createElement('meta'); mv.name = 'viewport'; mv.content = 'width=device-width,initial-scale=1,user-scalable=no';
+      doc.head.insertBefore(mv, doc.head.firstChild);
+    }
+    return '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+  }
+
+  function start(d) {
+    (d.files || []).forEach(function (f) { addFile(f[0], f[1]); });
+    var entry = exact(norm(d.entry));
+    if (!entry) { post({ forge: 'fail', msg: 'Could not find ' + d.entry + ' in this project.' }); return; }
+    VFS.base = dirOf(entry.path);
+    LS.load(d.storage || {});
+    prepare().then(function () {
+      var html = buildHtml(entry);
+      document.open();
+      document.write(html);
+      document.close();
+      post({ forge: 'ready' });
+    }, function (err) { post({ forge: 'fail', msg: 'Could not unpack this project: ' + (err && err.message ? err.message : err) }); });
+  }
+  function onMessage(e) {
+    var d = e.data;
+    if (!d || d.forge !== 'load') { return; }
+    window.removeEventListener('message', onMessage);
+    start(d);
+  }
+  window.addEventListener('message', onMessage);
+  window.__forgeHandlers();
+})();
+
+</script>
+<script id="srcModel" type="text/plain">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const post = (o) => { try { parent.postMessage(o, '*'); } catch (e) {} };
+const note = document.getElementById('note');
+const ui = document.getElementById('ui');
+
+window.addEventListener('error', (e) => post({ forge: 'err', msg: String(e.message || 'Error') }));
+window.addEventListener('message', (e) => { if (e.data && e.data.forge === 'model') { start(e.data); } });
+post({ forge: 'viewer-ready' });
+
+function fail(err) {
+  const msg = 'Could not open this model: ' + ((err && err.message) || err);
+  note.textContent = msg;
+  post({ forge: 'model-fail', msg: msg });
+}
+
+function start(d) {
+  note.textContent = 'Opening the model...';
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+  } catch (e) { fail(new Error('This browser cannot draw 3D graphics.')); return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1b1a3a);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+  sun.position.set(3, 5, 4);
+  scene.add(sun);
+
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  const urls = {};
+  d.files.forEach((f) => { urls[f[0]] = URL.createObjectURL(new Blob([f[1]])); });
+  const mgr = new THREE.LoadingManager();
+  mgr.setURLModifier((url) => {
+    if (url.startsWith('blob:') || url.startsWith('data:')) { return url; }
+    const name = decodeURIComponent(url.split('?')[0]).split('/').pop().toLowerCase();
+    for (const p in urls) { if (p.split('/').pop().toLowerCase() === name) { return urls[p]; } }
+    return url;
+  });
+
+  const entry = d.files.find((f) => f[0] === d.entry);
+  if (!entry) { fail(new Error('The model file is missing.')); return; }
+  const isGlb = /\.glb$/i.test(d.entry);
+  const data = isGlb ? entry[1] : new TextDecoder('utf-8').decode(entry[1]);
+
+  let mixer = null, action = null, home = null;
+  const clock = new THREE.Clock();
+
+  function frame(obj) {
+    const box = new THREE.Box3().setFromObject(obj);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    const dist = (maxDim / (2 * Math.tan((camera.fov * Math.PI) / 360))) * 1.7;
+    camera.position.set(center.x + dist * 0.7, center.y + dist * 0.5, center.z + dist);
+    camera.near = maxDim / 200;
+    camera.far = maxDim * 200;
+    camera.updateProjectionMatrix();
+    controls.target.copy(center);
+    controls.update();
+    home = { pos: camera.position.clone(), target: center.clone() };
+  }
+
+  function button(label, fn) {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.onclick = fn;
+    ui.appendChild(b);
+    return b;
+  }
+
+  const loader = new GLTFLoader(mgr);
+  loader.parse(data, '', (gltf) => {
+    scene.add(gltf.scene);
+    frame(gltf.scene);
+    button('Reset view', () => { camera.position.copy(home.pos); controls.target.copy(home.target); controls.update(); });
+    if (gltf.animations && gltf.animations.length) {
+      mixer = new THREE.AnimationMixer(gltf.scene);
+      const sel = document.createElement('select');
+      gltf.animations.forEach((clip, i) => {
+        const o = document.createElement('option');
+        o.value = String(i);
+        o.textContent = clip.name || ('Animation ' + (i + 1));
+        sel.appendChild(o);
+      });
+      const play = (i) => {
+        if (action) { action.stop(); }
+        action = mixer.clipAction(gltf.animations[i]);
+        action.reset().play();
+      };
+      sel.onchange = () => play(parseInt(sel.value, 10));
+      ui.appendChild(sel);
+      const pause = button('Pause', () => {
+        if (!action) { return; }
+        action.paused = !action.paused;
+        pause.textContent = action.paused ? 'Play' : 'Pause';
+      });
+      play(0);
+    }
+    note.textContent = '';
+    post({ forge: 'model-ready', clips: (gltf.animations || []).length });
+  }, (err) => { fail(err); });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+  renderer.setAnimationLoop(() => {
+    const dt = clock.getDelta();
+    if (mixer) { mixer.update(dt); }
+    controls.update();
+    renderer.render(scene, camera);
+  });
+}
+
+</script>
+<script>
+(function () {
+'use strict';
+
+/* ================= basics ================= */
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function trim(s) { return String(s == null ? '' : s).replace(/^\s+|\s+$/g, ''); }
+function mk(tag, cls, html) { var n = document.createElement(tag); if (cls) { n.className = cls; } if (html != null) { n.innerHTML = html; } return n; }
+function on(n, ev, fn) { n.addEventListener(ev, fn, false); }
+function each(list, fn) { for (var i = 0; i < list.length; i++) { fn(list[i], i); } }
+function nowMs() { return new Date().getTime(); }
+function fmtSecs(s) { var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
+function slug(s) { var t = String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); return (t || 'forge').substring(0, 40); }
+function removeNode(n) { if (n && n.parentNode) { n.parentNode.removeChild(n); } }
+
+var toastTimer = 0;
+function toast(msg) {
+  var t = $('toast');
+  t.textContent = msg;
+  t.className = 'on';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.className = ''; }, 4200);
+}
+
+function setBusy(btn, isBusy, label) {
+  if (isBusy) {
+    if (!btn.disabled) { btn.setAttribute('data-l', btn.textContent); }
+    btn.textContent = label;
+    btn.disabled = true;
+  } else {
+    btn.textContent = btn.getAttribute('data-l') || btn.textContent;
+    btn.disabled = false;
+  }
+}
+
+function autoGrow(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight + 2, Math.round(window.innerHeight * 0.32)) + 'px';
+}
+
+/* ================= storage (falls back to memory if the browser blocks it) ================= */
+var mem = {};
+var canLS = true;
+try { window.localStorage.setItem('forge.t', '1'); window.localStorage.removeItem('forge.t'); } catch (e0) { canLS = false; }
+function load(key, def) {
+  try {
+    var raw = canLS ? window.localStorage.getItem(key) : mem[key];
+    if (raw == null) { return def; }
+    return JSON.parse(raw);
+  } catch (e) { return def; }
+}
+function save(key, val) {
+  var raw = JSON.stringify(val);
+  mem[key] = raw;
+  if (!canLS) { return true; }
+  try { window.localStorage.setItem(key, raw); return true; } catch (e) { return false; }
+}
+
+/* ================= settings ================= */
+var DEF = {
+  anthropicKey: '', anthropicModel: 'claude-fable-5-1',
+  openaiKey: '', openaiChatModel: 'gpt-5.5', openaiImageModel: 'gpt-image-2',
+  googleKey: '', googleVideoModel: 'veo-3.1-generate-preview', googleImageModel: 'imagen-4.0-generate-001',
+  chatModel: 'puter:claude-sonnet-5', buildModel: 'puter:claude-sonnet-5', bestModel: 'puter:claude-fable-5-1',
+  puterExtraModel: '', puterImageModel: 'gpt-image-2', puterVideoModel: 'veo-3.1-lite',
+  imageProvider: 'puter', videoProvider: 'puter'
+};
+var S = load('forge.settings', {});
+(function () { for (var k in DEF) { if (DEF.hasOwnProperty(k) && S[k] == null) { S[k] = DEF[k]; } } })();
+var SET_FIELDS = ['anthropicKey', 'anthropicModel', 'openaiKey', 'openaiChatModel', 'openaiImageModel',
+  'googleKey', 'googleVideoModel', 'googleImageModel', 'puterExtraModel', 'puterImageModel', 'puterVideoModel'];
+
+/* models reachable through Puter with no API key */
+var PUTER_MODELS = [
+  ['claude-fable-5-1', 'Claude Fable 5.1 (best)'],
+  ['claude-opus-5', 'Claude Opus 5'],
+  ['claude-sonnet-5', 'Claude Sonnet 5'],
+  ['claude-haiku-4-5', 'Claude Haiku 4.5 (fast)'],
+  ['openai/gpt-5.5', 'GPT-5.5'],
+  ['openai/gpt-5.4-nano', 'GPT-5.4 Nano (fast)'],
+  ['google/gemini-3.8-flash', 'Gemini 3.8 Flash']
+];
+function puterModelName(id) {
+  for (var i = 0; i < PUTER_MODELS.length; i++) { if (PUTER_MODELS[i][0] === id) { return PUTER_MODELS[i][1]; } }
+  return id;
+}
+/* a model spec is "puter:<model id>", "anthropic:key", or "openai:key" */
+function parseSpec(spec) {
+  var t = String(spec || ''), i = t.indexOf(':');
+  return i < 0 ? { p: 'puter', m: t } : { p: t.substring(0, i), m: t.substring(i + 1) };
+}
+function haveKey(p) {
+  if (p === 'puter') { return true; }
+  return !!(p === 'anthropic' ? S.anthropicKey : (p === 'openai' ? S.openaiKey : S.googleKey));
+}
+function provName(p) { return p === 'puter' ? 'Puter' : (p === 'anthropic' ? 'Anthropic' : (p === 'openai' ? 'OpenAI' : 'Google AI')); }
+function modelOptions() {
+  var o = [];
+  each(PUTER_MODELS, function (m) { o.push(['puter:' + m[0], m[1]]); });
+  if (trim(S.puterExtraModel)) { o.push(['puter:' + trim(S.puterExtraModel), trim(S.puterExtraModel)]); }
+  if (S.anthropicKey) { o.push(['anthropic:key', 'Claude, your key: ' + S.anthropicModel]); }
+  if (S.openaiKey) { o.push(['openai:key', 'GPT, your key: ' + S.openaiChatModel]); }
+  return o;
+}
+function optionHas(list, v) { for (var i = 0; i < list.length; i++) { if (list[i][0] === v) { return true; } } return false; }
+function specReady(spec) { return haveKey(parseSpec(spec).p); }
+function needKey(p) { toast('Add your ' + provName(p) + ' key first.'); openSettings(); }
+function needSpec(spec) { needKey(parseSpec(spec).p); }
+function helperSpec() { return specReady(S.chatModel) ? S.chatModel : DEF.chatModel; }
+
+function setOptions(sel, opts, value) {
+  sel.innerHTML = '';
+  each(opts, function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; sel.appendChild(op); });
+  sel.value = value;
+}
+function fixSpec(prop) { if (!optionHas(modelOptions(), S[prop])) { S[prop] = DEF[prop]; } }
+function refreshLabels() {
+  fixSpec('chatModel'); fixSpec('buildModel'); fixSpec('bestModel');
+  var o = modelOptions();
+  var engine = (typeof B !== 'undefined' && B && B.target && B.target !== 'web');
+  setOptions($('chatProv'), o, S.chatModel);
+  setOptions($('bldProv'), o, engine ? S.bestModel : S.buildModel);
+  var io = [['puter', 'Free (Puter): ' + S.puterImageModel]];
+  if (S.openaiKey) { io.push(['openai', 'OpenAI, your key: ' + S.openaiImageModel]); }
+  if (S.googleKey) { io.push(['google', 'Google, your key: ' + S.googleImageModel]); }
+  if (!optionHas(io, S.imageProvider)) { S.imageProvider = 'puter'; }
+  setOptions($('imgProv'), io, S.imageProvider);
+  var vo = [['puter', 'Free (Puter): ' + S.puterVideoModel]];
+  if (S.googleKey) { vo.push(['google', 'Google Veo, your key: ' + S.googleVideoModel]); }
+  if (!optionHas(vo, S.videoProvider)) { S.videoProvider = 'puter'; }
+  setOptions($('vidProv'), vo, S.videoProvider);
+  syncVideoUI();
+}
+function syncVideoUI() {
+  var viaPuter = $('vidProv').value === 'puter';
+  $('vidLenWrap').style.display = viaPuter ? '' : 'none';
+  $('vidNote').textContent = viaPuter
+    ? 'Made with ' + S.puterVideoModel + ' on your free Puter credit. Video uses the most credit of anything in Forge.'
+    : 'Made with Google ' + S.googleVideoModel + ' on your Google account. Change the model in Settings.';
+}
+function togglePw(show) {
+  each(['s-anthropicKey', 's-openaiKey', 's-googleKey'], function (id) { $(id).type = show ? 'text' : 'password'; });
+}
+function openSettings() {
+  each(SET_FIELDS, function (f) { $('s-' + f).value = S[f]; });
+  $('s-show').checked = false;
+  togglePw(false);
+  refreshPuterUI();
+  checkPuter();
+  $('sheet').className = 'sheet on';
+}
+function closeSettings() { $('sheet').className = 'sheet'; }
+function saveSettings() {
+  each(SET_FIELDS, function (f) {
+    var v = trim($('s-' + f).value);
+    if (!v && f.indexOf('Key') === -1) { v = DEF[f]; }
+    S[f] = v;
+  });
+  refreshLabels();
+  save('forge.settings', S);
+  closeSettings();
+  renderChat(false);
+  toast('Settings saved.');
+}
+function wipeAll() {
+  confirmSheet('Erase all Forge data?', 'This removes your keys, chat history, and saved builds from this browser.', 'Erase everything', function () {
+    try {
+      if (canLS) {
+        var gone = [];
+        for (var i = 0; i < window.localStorage.length; i++) { var key = window.localStorage.key(i); if (key && key.indexOf('forge.') === 0) { gone.push(key); } }
+        each(gone, function (k) { window.localStorage.removeItem(k); });
+      }
+    } catch (e) {}
+    window.location.reload();
+  });
+}
+
+/* ================= Puter: free sign-in instead of API keys ================= */
+/* where is Forge running, and can it reach the internet? */
+function envInfo() {
+  var ua = navigator.userAgent || '', inFrame = false;
+  try { inFrame = window.self !== window.top; } catch (e) { inFrame = true; }
+  var isWebView = /; wv\)/.test(ua) || /Version\/4\.0 .*Chrome\//.test(ua);
+  var where = inFrame ? 'frame' : (isWebView ? 'webview' : (/^(file|content):$/.test(String(location.protocol)) ? 'file' : 'web'));
+  return { where: where, ua: ua };
+}
+function whereLabel(w) {
+  return (w === 'frame' || w === 'webview') ? 'inside an app preview' : (w === 'file' ? 'a local file in your browser' : 'a website');
+}
+function offlineHelp() {
+  var e = envInfo();
+  if (navigator.onLine === false) { return 'Your phone says it is offline. Turn on Wi-Fi or mobile data, then try again.'; }
+  if (e.where === 'frame' || e.where === 'webview') {
+    return 'This looks like an app preview, such as the Claude app. Previews block outside websites even when your internet works. Open forge.html in Chrome instead.';
+  }
+  return 'Check that Wi-Fi or mobile data works, and turn off any VPN, private DNS, or ad blocker. Then try again.';
+}
+function probe(url, cb) {
+  var done = false;
+  function fin(ok) { if (done) { return; } done = true; clearTimeout(timer); cb(ok); }
+  var timer = setTimeout(function () { fin(false); }, 8000);
+  try { fetch(url, { mode: 'no-cors', cache: 'no-store' }).then(function () { fin(true); }, function () { fin(false); }); }
+  catch (e) { fin(false); }
+}
+/* writes a plain-language connection report into the element out */
+function netTest(out) {
+  var e = envInfo(), res = { net: null, script: null, api: null };
+  out.className = 'netout on';
+  function word(v) { return v === null ? 'checking...' : (v ? 'OK' : 'blocked'); }
+  function verdict() {
+    if (!res.net) {
+      return (e.where === 'frame' || e.where === 'webview')
+        ? 'This preview blocks outside websites. Open forge.html in Chrome.'
+        : 'Your connection is blocking outside websites. Check Wi-Fi or mobile data, and turn off any VPN or private DNS.';
+    }
+    if (!res.script || !res.api) { return 'Something is blocking puter.com. Try a different network, or turn off a VPN, private DNS, or ad blocker.'; }
+    return 'Everything is reachable. Tap Sign in to Puter and try again.';
+  }
+  function show() {
+    var t = 'Opened from: ' + whereLabel(e.where) + '\nPhone says online: ' + (navigator.onLine === false ? 'no' : 'yes') +
+      '\nInternet: ' + word(res.net) + '\nPuter script: ' + word(res.script) + '\nPuter servers: ' + word(res.api);
+    if (res.net !== null && res.script !== null && res.api !== null) { t += '\n\n' + verdict(); }
+    out.textContent = t;
+  }
+  show();
+  probe('https://www.gstatic.com/generate_204', function (ok) { res.net = ok; show(); });
+  probe('https://js.puter.com/v2/', function (ok) { res.script = ok; show(); });
+  probe('https://api.puter.com/', function (ok) { res.api = ok; show(); });
+}
+var puterStatus = 'unknown', puterUser = '', puterScript = { state: 'idle', cbs: [] };
+
+function errMsg(e) { return (e && e.message) ? String(e.message) : String(e); }
+function puterErr(e) {
+  if (e == null) { return 'Something went wrong.'; }
+  if (typeof e === 'string') { return e; }
+  var code = String(e.code || e.error_code || (typeof e.error === 'string' ? e.error : '') || '');
+  var msg = e.message || (typeof e.error === 'string' ? e.error : '') || e.msg || '';
+  if (typeof msg !== 'string') { try { msg = JSON.stringify(msg); } catch (x) { msg = String(msg); } }
+  var both = code + ' ' + msg;
+  if (/insufficient_funds|insufficient|out of (credit|funds)|allowance/i.test(both)) {
+    return 'Your free Puter credit is used up. It refills monthly, or you can add credit at puter.com.';
+  }
+  if (code === 'popup_blocked' || /popup.*block/i.test(both)) {
+    return 'Your browser blocked the Puter sign-in window. Tap Sign in to Puter again. If you are inside another app, open Forge in Chrome.';
+  }
+  if (code === 'auth_window_closed') { return 'The Puter window was closed before sign-in finished. Tap Sign in to Puter to try again.'; }
+  if (e.errorCode === 'moderation_flagged') { return 'The content filter refused this prompt. Try rewording it.'; }
+  if (code === 'upstream_timeout') { return 'The provider took too long. Try again, or pick a shorter clip or a faster model.'; }
+  if (!msg) { try { msg = JSON.stringify(e); } catch (y) { msg = String(e); } }
+  return msg;
+}
+function loadPuter(cb) {
+  if (window.puter && window.puter.ai) { cb(null); return; }
+  if (puterScript.state === 'failed') { puterScript.state = 'idle'; }
+  puterScript.cbs.push(cb);
+  if (puterScript.state === 'loading') { return; }
+  puterScript.state = 'loading';
+  var sc = document.createElement('script');
+  sc.src = 'https://js.puter.com/v2/';
+  sc.async = true;
+  sc.onload = function () {
+    var list = puterScript.cbs; puterScript.cbs = [];
+    if (!(window.puter && window.puter.ai)) {
+      puterScript.state = 'failed';
+      removeNode(sc);
+      each(list, function (f) { f({ message: 'Puter loaded but did not start. ' + offlineHelp() }); });
+      return;
+    }
+    puterScript.state = 'ready';
+    each(list, function (f) { f(null); });
+  };
+  sc.onerror = function () {
+    puterScript.state = 'failed';
+    removeNode(sc);
+    var list = puterScript.cbs; puterScript.cbs = [];
+    each(list, function (f) { f({ message: 'Could not load Puter. ' + offlineHelp() }); });
+  };
+  document.head.appendChild(sc);
+}
+function puterIsIn() {
+  try { return !!window.puter.auth.isSignedIn(); } catch (e) { return false; }
+}
+function setPuterIn() {
+  var was = puterStatus;
+  puterStatus = 'in';
+  if (was !== 'in') {
+    try {
+      Promise.resolve(window.puter.auth.getUser()).then(function (u) { puterUser = (u && (u.username || u.name)) || ''; refreshPuterUI(); }, function () {});
+    } catch (e) {}
+  }
+  refreshPuterUI();
+}
+function checkPuter() {
+  loadPuter(function (err) {
+    if (err) { puterStatus = 'blocked'; refreshPuterUI(); return; }
+    if (puterIsIn()) { setPuterIn(); } else { puterStatus = 'out'; refreshPuterUI(); }
+  });
+}
+/* Runs cb(null) once Puter is loaded and signed in. Opens the sign-in window if needed. */
+function puterReady(cb) {
+  loadPuter(function (err) {
+    if (err) { puterStatus = 'blocked'; refreshPuterUI(); cb(err); return; }
+    if (puterIsIn()) { setPuterIn(); cb(null); return; }
+    var pr;
+    try { pr = window.puter.auth.signIn(); }
+    catch (e) { cb({ message: 'Could not open the Puter sign-in window. Open Forge in Chrome, then tap Sign in to Puter.' }); return; }
+    Promise.resolve(pr).then(function () { setPuterIn(); cb(null); }, function (e2) {
+      puterStatus = 'out'; refreshPuterUI();
+      cb({ message: puterErr(e2) + ' You can also tap Sign in to Puter first.' });
+    });
+  });
+}
+function signInPuter() {
+  loadPuter(function (err) {
+    if (err) { puterStatus = 'blocked'; refreshPuterUI(); toast(err.message); return; }
+    var pr;
+    try { pr = window.puter.auth.signIn(); }
+    catch (e) { toast('Could not open the Puter sign-in window. Open Forge in Chrome and try again.'); return; }
+    Promise.resolve(pr).then(function () { setPuterIn(); toast('Signed in to Puter.'); }, function (e2) { toast(puterErr(e2)); });
+  });
+}
+function signOutPuter() {
+  try { window.puter.auth.signOut(); } catch (e) {}
+  puterStatus = 'out'; puterUser = '';
+  refreshPuterUI();
+  toast('Signed out of Puter.');
+}
+function refreshPuterUI() {
+  var st = $('puterStatus');
+  if (!st) { return; }
+  var isIn = puterStatus === 'in';
+  st.textContent = isIn
+    ? 'Signed in' + (puterUser ? ' as ' + puterUser : '') + '. Forge uses your free Puter allowance.'
+    : (puterStatus === 'blocked' ? 'Cannot reach Puter. ' + offlineHelp() : 'Not signed in yet.');
+  $('puterSignIn').style.display = isIn ? 'none' : '';
+  $('puterSignOut').style.display = isIn ? '' : 'none';
+  $('puterSignIn').textContent = puterStatus === 'blocked' ? 'Try again' : 'Sign in to Puter (free)';
+  if (typeof chat !== 'undefined' && !chat.length) { renderChat(false); }
+}
+
+/* ================= confirm sheet ================= */
+var askYes = null;
+function confirmSheet(title, body, yesLabel, fn) {
+  $('askT').textContent = title;
+  $('askB').textContent = body;
+  $('askYes').textContent = yesLabel;
+  askYes = fn;
+  $('toast').className = '';
+  $('ask').className = 'sheet ask on';
+}
+function closeAsk() { $('ask').className = 'sheet ask'; askYes = null; }
+
+/* ================= networking (XMLHttpRequest, no fetch or promises needed) ================= */
+var NET_MSG = 'Could not reach the server. Check your connection. If it keeps happening, open Forge in Chrome, since some in-app previews block outside requests.';
+
+function errText(x) {
+  var msg = 'Request failed (HTTP ' + x.status + ').';
+  var t = '';
+  try { if (x.responseType !== 'blob') { t = x.responseText; } } catch (e) {}
+  if (t) {
+    try {
+      var j = JSON.parse(t);
+      var e2 = j.error || j;
+      msg = (typeof e2 === 'string') ? e2 : (e2.message || msg);
+    } catch (e3) { if (t.length < 300) { msg = t; } }
+  }
+  if (!/[.!?]$/.test(msg)) { msg += '.'; }
+  if (x.status === 401 || x.status === 403) { msg += ' Check the key in Settings.'; }
+  if (x.status === 429) { msg += ' You may be rate-limited or out of credit.'; }
+  return msg;
+}
+
+function http(o) {
+  var x = new XMLHttpRequest();
+  var finished = false;
+  x.open(o.method || 'GET', o.url, true);
+  if (o.blob) { x.responseType = 'blob'; }
+  if (o.headers) { for (var h in o.headers) { if (o.headers.hasOwnProperty(h)) { x.setRequestHeader(h, o.headers[h]); } } }
+  if (o.timeout) { x.timeout = o.timeout; }
+  function end(err) { if (finished) { return; } finished = true; o.done(err, x); }
+  if (o.progress) { x.onprogress = function () { o.progress(x.responseText); }; }
+  x.onload = function () {
+    if (x.status >= 200 && x.status < 300) { end(null); } else { end({ status: x.status, message: errText(x) }); }
+  };
+  x.onerror = function () { end({ status: 0, message: NET_MSG }); };
+  x.ontimeout = function () { end({ status: 0, message: 'Timed out waiting for the server.' }); };
+  x.onabort = function () { end({ aborted: true, message: 'Stopped.' }); };
+  x.send(o.body == null ? null : o.body);
+  return x;
+}
+
+function parseJSON(x) { try { return JSON.parse(x.responseText); } catch (e) { return null; } }
+
+/* server-sent events, read incrementally from a growing responseText */
+function sseReader(onEvent) {
+  var pos = 0;
+  return function (text, final) {
+    var end = final ? text.length : text.lastIndexOf('\n') + 1;
+    if (end <= pos) { return; }
+    var chunk = text.substring(pos, end);
+    pos = end;
+    var lines = chunk.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      var ln = lines[i];
+      if (ln.charAt(ln.length - 1) === '\r') { ln = ln.substring(0, ln.length - 1); }
+      if (ln.indexOf('data:') !== 0) { continue; }
+      var d = ln.substring(5);
+      if (d.charAt(0) === ' ') { d = d.substring(1); }
+      if (d === '' || d === '[DONE]') { continue; }
+      var j = null;
+      try { j = JSON.parse(d); } catch (e) { continue; }
+      onEvent(j);
+    }
+  };
+}
+
+/* One streaming text call for every provider.
+   spec: "puter:<model>" (no key), "anthropic:key", or "openai:key".
+   cb.onText(delta, fullText), cb.onThinking(), cb.onDone(state), cb.onError(message, state, aborted)
+   opts.effort asks Puter's OpenAI models for deeper reasoning. Returns an object with abort(). */
+function streamChat(spec, system, msgs, maxTokens, cb, opts) {
+  var ps = parseSpec(spec);
+  var st = { text: '', refused: false, cut: false, err: null, gotText: false };
+  if (ps.p === 'puter') { return streamPuter(ps.m, system, msgs, cb, opts || {}, st); }
+  return streamDirect(ps.p, system, msgs, maxTokens, cb, st);
+}
+
+function streamDirect(provider, system, msgs, maxTokens, cb, st) {
+  var url, headers, body;
+  if (provider === 'anthropic') {
+    url = 'https://api.anthropic.com/v1/messages';
+    headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': S.anthropicKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    };
+    body = { model: S.anthropicModel, max_tokens: maxTokens, stream: true, system: system, messages: msgs };
+  } else {
+    url = 'https://api.openai.com/v1/chat/completions';
+    headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.openaiKey };
+    body = { model: S.openaiChatModel, stream: true, messages: [{ role: 'system', content: system }].concat(msgs) };
+  }
+  var read = sseReader(function (j) {
+    if (provider === 'anthropic') {
+      if (j.type === 'content_block_delta' && j.delta && j.delta.type === 'text_delta') {
+        st.text += j.delta.text; st.gotText = true; cb.onText(j.delta.text, st.text);
+      } else if (j.type === 'content_block_start' && j.content_block && j.content_block.type === 'thinking') {
+        if (cb.onThinking) { cb.onThinking(); }
+      } else if (j.type === 'message_delta' && j.delta) {
+        if (j.delta.stop_reason === 'refusal') { st.refused = true; }
+        if (j.delta.stop_reason === 'max_tokens') { st.cut = true; }
+      } else if (j.type === 'error') {
+        st.err = (j.error && j.error.message) || 'The model stopped with an error.';
+      }
+    } else {
+      if (j.error) { st.err = j.error.message || 'The model stopped with an error.'; return; }
+      var c = j.choices && j.choices[0];
+      if (c && c.delta && typeof c.delta.content === 'string' && c.delta.content) {
+        st.text += c.delta.content; st.gotText = true; cb.onText(c.delta.content, st.text);
+      }
+      if (c && c.finish_reason === 'length') { st.cut = true; }
+      if (c && c.finish_reason === 'content_filter') { st.refused = true; }
+    }
+  });
+  return http({
+    method: 'POST', url: url, headers: headers, body: JSON.stringify(body), timeout: 900000,
+    progress: function (t) { read(t, false); },
+    done: function (err, x) {
+      if (err) { cb.onError(err.aborted ? null : err.message, st, !!err.aborted); return; }
+      read(x.responseText, true);
+      if (st.err) { cb.onError(st.err, st, false); return; }
+      cb.onDone(st);
+    }
+  });
+}
+
+function extractText(r) {
+  if (r == null) { return ''; }
+  if (typeof r === 'string') { return r; }
+  var m = r.message || r, c = m.content;
+  if (typeof c === 'string') { return c; }
+  if (c && c.length) {
+    var out = '';
+    for (var i = 0; i < c.length; i++) { if (c[i] && typeof c[i].text === 'string') { out += c[i].text; } }
+    return out;
+  }
+  return typeof r.text === 'string' ? r.text : '';
+}
+
+function streamPuter(model, system, msgs, cb, opts, st) {
+  var ctl = { aborted: false, iter: null, abort: function () { ctl.aborted = true; } };
+  var tries = (opts.effort && /gpt|openai/i.test(model)) ? [opts.effort, 'high', null] : [null];
+  var attempt = 0, ended = false;
+
+  function endErr(m, aborted) { if (ended) { return; } ended = true; cb.onError(m, st, aborted); }
+  function endOk() { if (ended) { return; } ended = true; cb.onDone(st); }
+  function gone() {
+    if (ended) { return true; }
+    if (!ctl.aborted) { return false; }
+    try { if (ctl.iter && ctl.iter['return']) { ctl.iter['return'](); } } catch (e) {}
+    endErr(null, true);
+    return true;
+  }
+  function fail(e) {
+    if (gone()) { return; }
+    var m = puterErr(e);
+    if (!st.gotText && attempt < tries.length - 1 && /reasoning|effort|xhigh|unsupported|invalid/i.test(m)) {
+      attempt++; st.err = null; run(); return;
+    }
+    endErr(m, false);
+  }
+  function finish() {
+    if (gone()) { return; }
+    if (st.err) { fail({ message: st.err }); return; }
+    endOk();
+  }
+  function handle(part) {
+    if (!part) { return; }
+    if (part.type === 'error') { st.err = part.message || 'The model stopped with an error.'; return; }
+    if (part.type === 'reasoning') { if (cb.onThinking) { cb.onThinking(); } return; }
+    if (typeof part.text === 'string' && part.text && (!part.type || part.type === 'text')) {
+      st.text += part.text; st.gotText = true; cb.onText(part.text, st.text);
+    }
+  }
+  function consume(resp) {
+    var it = null;
+    try { it = (resp && resp[Symbol.asyncIterator]) ? resp[Symbol.asyncIterator]() : null; } catch (e) { it = null; }
+    if (!it) {
+      var txt = extractText(resp);
+      if (txt) { st.text = txt; st.gotText = true; cb.onText(txt, txt); }
+      finish();
+      return;
+    }
+    ctl.iter = it;
+    function pump() {
+      if (gone()) { return; }
+      var nx;
+      try { nx = it.next(); } catch (e2) { fail(e2); return; }
+      nx.then(function (r) {
+        if (gone()) { return; }
+        if (r.done) { finish(); return; }
+        handle(r.value);
+        pump();
+      }, function (e3) { fail(e3); });
+    }
+    pump();
+  }
+  function run() {
+    var eff = tries[attempt];
+    puterReady(function (err) {
+      if (gone()) { return; }
+      if (err) { endErr(errMsg(err), false); return; }
+      var options = { model: model, stream: true };
+      if (eff) { options.reasoning_effort = eff; }
+      var pr;
+      try { pr = window.puter.ai.chat([{ role: 'system', content: system }].concat(msgs), options); }
+      catch (e4) { fail(e4); return; }
+      Promise.resolve(pr).then(function (resp) { consume(resp); }, function (e5) { fail(e5); });
+    });
+  }
+  run();
+  return ctl;
+}
+
+/* ================= small markdown renderer (escapes everything first) ================= */
+function inlineMd(s) {
+  s = esc(s);
+  s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  return s;
+}
+function textBlock(t) {
+  var paras = String(t).split(/\n{2,}/), html = '';
+  for (var i = 0; i < paras.length; i++) {
+    var p = paras[i].replace(/^\n+|\n+$/g, '');
+    if (!p) { continue; }
+    var lines = p.split('\n'), row = [];
+    for (var j = 0; j < lines.length; j++) {
+      var ln = lines[j];
+      var h = /^#{1,4}\s+(.*)$/.exec(ln);
+      if (h) { ln = '**' + h[1] + '**'; } else { ln = ln.replace(/^\s*[-*]\s+/, '\u2022 '); }
+      row.push(inlineMd(ln));
+    }
+    html += '<p>' + row.join('<br>') + '</p>';
+  }
+  return html;
+}
+function md(src) {
+  var parts = String(src).split('```'), out = '';
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) {
+      var code = parts[i], nl = code.indexOf('\n');
+      if (nl > -1 && /^[a-zA-Z0-9_+#.\-]*$/.test(code.substring(0, nl))) { code = code.substring(nl + 1); }
+      out += '<div class="codewrap"><button type="button" class="copy">Copy</button><pre class="code">' + esc(code.replace(/\n$/, '')) + '</pre></div>';
+    } else {
+      out += textBlock(parts[i]);
+    }
+  }
+  return out;
+}
+
+/* ================= copy, save, share ================= */
+function copyText(t) {
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    toast(ok ? 'Copied.' : 'Copy failed. Select the text and copy it by hand.');
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(function () { toast('Copied.'); }, fallback);
+  } else { fallback(); }
+}
+function b64ToBlob(b64, mime) {
+  var bin = atob(b64), len = bin.length, arr = new Uint8Array(len);
+  for (var i = 0; i < len; i++) { arr[i] = bin.charCodeAt(i); }
+  return new Blob([arr], { type: mime });
+}
+function saveBlob(blob, name) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = name; a.style.display = 'none';
+  document.body.appendChild(a); a.click();
+  setTimeout(function () { removeNode(a); URL.revokeObjectURL(url); }, 4000);
+}
+function shareBlob(blob, name, mime, title) {
+  try {
+    var f = new File([blob], name, { type: mime });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) {
+      navigator.share({ files: [f], title: title }).then(function () {}, function () {});
+      return;
+    }
+  } catch (e) {}
+  toast('Sharing is not available here. Use Save instead.');
+}
+
+/* ================= navigation ================= */
+var TABS = ['chat', 'image', 'video', 'build', 'play'];
+function go(name) {
+  each(TABS, function (n) {
+    $('v-' + n).className = 'view' + (n === name ? ' on' : '');
+    $('t-' + n).className = (n === name ? 'on' : '');
+  });
+  if (name !== 'chat') { $('v-' + name).scrollTop = 0; }
+}
+
+function reveal(n) {
+  try { n.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { try { n.scrollIntoView(true); } catch (e2) {} }
+}
+
+/* gallery helpers */
+function ensureGallery(box) {
+  var g = box.querySelector('.gallery');
+  if (!g) { box.innerHTML = ''; g = mk('div', 'gallery'); box.appendChild(g); }
+  return g;
+}
+function prepend(g, n) { if (g.firstChild) { g.insertBefore(n, g.firstChild); } else { g.appendChild(n); } }
+function pendingPanel(title, wide) {
+  var pn = mk('div', 'panel job slam' + (wide ? ' wide' : ''));
+  pn.innerHTML = '<div class="jobbody"><strong>' + esc(title) + '</strong><div class="js">Starting\u2026</div><div class="stripe"></div></div>';
+  return pn;
+}
+function failPanel(pn, title, msg) {
+  pn.className = 'panel wide';
+  pn.innerHTML = '<div class="jobbody"><strong>' + esc(title) + '</strong><p class="err"></p></div><div class="pbtns"><button type="button">Dismiss</button></div>';
+  pn.querySelector('.err').textContent = msg;
+  on(pn.querySelector('button'), 'click', function () { removeNode(pn); });
+}
+
+/* ================= chat ================= */
+var CHAT_SYSTEM = 'You are Forge, the assistant inside a pocket studio for makers: games, art, video, and apps. ' +
+  'Answer questions and help with ideas, worldbuilding, scripts, design, and code. The reader is on a phone, so keep replies compact: short paragraphs, light formatting, code in fenced blocks. ' +
+  'The studio can make images, videos, and playable apps or games. When the user clearly asks you to create one of those, reply with one short friendly sentence, then end the message with exactly one line in this form: ' +
+  '"@@image: <vivid, specific prompt>" or "@@video: <vivid prompt with action and camera>" or "@@build: <clear brief: what to make, target engine if named, controls, look>". ' +
+  'The app turns that line into a button the user taps, so you never generate anything yourself. Use these lines only when the user asked to create something, and never mention the syntax.';
+
+var chat = load('forge.chat', []);
+var chatBusy = false, chatReq = null, paintTimer = 0;
+
+function actionsOf(text) {
+  var out = [], re = /^@@(image|video|build):[ \t]*(.+)$/gm, m;
+  while ((m = re.exec(text)) !== null) { out.push({ kind: m[1], prompt: trim(m[2]) }); }
+  return out;
+}
+function visibleText(text) { return trim(String(text).replace(/(^|\n)@@[^\n]*/g, '')); }
+
+function balloonHTML(m) {
+  if (m.role === 'user') { return textBlock(m.text); }
+  var t = visibleText(m.text || '');
+  if (m.error) { return (t ? md(t) : '') + '<p class="err">' + esc(m.error) + '</p>'; }
+  if (!t) { return m.pending ? '<span class="dots" aria-label="Thinking"><i></i><i></i><i></i></span>' : ''; }
+  return md(t);
+}
+
+var ACT = { image: ['Image prompt', 'Make image'], video: ['Video prompt', 'Make video'], build: ['Build brief', 'Build it'] };
+function actionCard(a) {
+  var c = mk('div', 'act');
+  c.innerHTML = '<div class="act-t">' + ACT[a.kind][0] + '</div><div class="act-p">' + esc(a.prompt) + '</div>';
+  var r = mk('div', 'rowbtn');
+  var b1 = mk('button', 'btn small primary', ACT[a.kind][1]); b1.type = 'button';
+  var b2 = mk('button', 'btn small', 'Edit first'); b2.type = 'button';
+  on(b1, 'click', function () { runAction(a.kind, a.prompt, true); });
+  on(b2, 'click', function () { runAction(a.kind, a.prompt, false); });
+  r.appendChild(b1); r.appendChild(b2); c.appendChild(r);
+  return c;
+}
+
+function msgNode(m) {
+  var w = mk('div', 'msg ' + (m.role === 'user' ? 'user' : 'ai'));
+  var col = mk('div', 'col');
+  var html = balloonHTML(m);
+  var acts = (m.role !== 'user' && !m.pending) ? actionsOf(m.text || '') : [];
+  if (html || m.pending) {
+    var b = mk('div', 'balloon'); b.innerHTML = html; col.appendChild(b);
+  }
+  each(acts, function (a) { col.appendChild(actionCard(a)); });
+  if (m.error && m.error.indexOf('Settings') > -1) {
+    var sb = mk('button', 'btn small', 'Open settings'); sb.type = 'button'; sb.style.marginTop = '12px'; sb.style.alignSelf = 'flex-start';
+    on(sb, 'click', openSettings);
+    col.appendChild(sb);
+  }
+  if (m.error && m.error.indexOf('Puter credit') > -1) {
+    var pb = mk('button', 'btn small', 'Open Puter'); pb.type = 'button'; pb.style.marginTop = '12px'; pb.style.alignSelf = 'flex-start';
+    on(pb, 'click', function () { window.open('https://puter.com/dashboard', '_blank'); });
+    col.appendChild(pb);
+  }
+  if (m.error && m.error.indexOf('Sign in to Puter') > -1) {
+    var ib = mk('button', 'btn small primary', 'Sign in to Puter'); ib.type = 'button'; ib.style.marginTop = '12px'; ib.style.alignSelf = 'flex-start';
+    on(ib, 'click', function () { signInPuter(); });
+    col.appendChild(ib);
+  }
+  w.appendChild(col);
+  return w;
+}
+
+function emptyChat() {
+  var d = mk('div', 'empty');
+  var needSignIn = parseSpec(S.chatModel).p === 'puter' && puterStatus !== 'in';
+  d.innerHTML = '<h2>Ask anything, or say what to make.</h2><p>Forge chats, draws, films, and builds games.</p>';
+  if (needSignIn) {
+    var box = mk('div', '');
+    box.style.position = 'relative'; box.style.zIndex = '1'; box.style.marginBottom = '16px';
+    if (puterStatus === 'blocked') {
+      box.innerHTML = '<p><strong>Forge cannot reach Puter.</strong> ' + esc(offlineHelp()) + '</p>';
+      var where = envInfo().where;
+      if (where === 'frame' || where === 'webview') {
+        var steps = mk('ol', '', '<li>Save forge.html to your phone. Look for Download, Save, or Share on the file.</li><li>Open your Files app, go to Downloads, and tap forge.html.</li><li>Pick Chrome when your phone asks which app to use.</li>');
+        steps.style.margin = '0 0 12px'; steps.style.paddingLeft = '22px';
+        box.appendChild(steps);
+      }
+      var row = mk('div', 'rowbtn'); row.style.marginTop = '0';
+      var again = mk('button', 'btn primary', 'Try again'); again.type = 'button';
+      on(again, 'click', function () { checkPuter(); });
+      var test = mk('button', 'btn', 'Test connection'); test.type = 'button';
+      var report = mk('pre', 'netout');
+      on(test, 'click', function () { netTest(report); });
+      row.appendChild(again); row.appendChild(test);
+      box.appendChild(row); box.appendChild(report);
+    } else {
+      box.innerHTML = '<p><strong>Sign in to start. No API keys needed.</strong> A free Puter account runs Claude, GPT, and Gemini for you.</p>';
+      var btn = mk('button', 'btn primary', 'Sign in to Puter (free)'); btn.type = 'button';
+      on(btn, 'click', function () { signInPuter(); });
+      box.appendChild(btn);
+    }
+    d.appendChild(box);
+  }
+  d.appendChild(mk('p', '', needSignIn ? 'Then tap one to start:' : 'Tap one to start:'));
+  var seg = mk('div', 'seg');
+  d.appendChild(seg);
+  var ex = ['Make a paper crane hero for a 2D platformer', 'Write a 30 second script for a game trailer', 'Explain how coyote time works in a platformer'];
+  each(ex, function (t) {
+    var c = mk('button', 'chip', esc(t)); c.type = 'button';
+    on(c, 'click', function () { var ta = $('chatIn'); ta.value = t; autoGrow(ta); ta.focus(); });
+    seg.appendChild(c);
+  });
+  return d;
+}
+
+function renderChat(bottom) {
+  var log = $('chatlog');
+  var keep = log.scrollTop;
+  log.innerHTML = '';
+  if (!chat.length) { log.appendChild(emptyChat()); return; }
+  each(chat, function (m) { log.appendChild(msgNode(m)); });
+  log.scrollTop = bottom ? log.scrollHeight : keep;
+}
+function schedulePaint() {
+  if (paintTimer) { return; }
+  paintTimer = setTimeout(function () { paintTimer = 0; paintLast(); }, 60);
+}
+function paintLast() {
+  var last = chat[chat.length - 1];
+  var nodes = document.querySelectorAll('#chatlog .msg');
+  var node = nodes[nodes.length - 1];
+  if (!last || !node) { return; }
+  var b = node.querySelector('.balloon');
+  if (!b) { return; }
+  var log = $('chatlog');
+  var near = (log.scrollHeight - log.scrollTop - log.clientHeight) < 90;
+  b.innerHTML = balloonHTML(last);
+  if (near) { log.scrollTop = log.scrollHeight; }
+}
+function persistChat() {
+  var out = [];
+  each(chat.slice(-60), function (m) {
+    if (m.role === 'user' || trim(m.text)) { out.push({ role: m.role, text: m.text || '', error: m.error || null }); }
+  });
+  save('forge.chat', out);
+}
+function historyMsgs(list) {
+  var out = [];
+  each(list, function (m) {
+    if (m.error || !trim(m.text)) { return; }
+    out.push({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text });
+  });
+  out = out.slice(-24);
+  while (out.length && out[0].role !== 'user') { out.shift(); }
+  return out;
+}
+function setChatBusy(b) {
+  chatBusy = b;
+  $('chatSend').className = 'btn primary' + (b ? ' busy' : '');
+  $('chatSend').setAttribute('aria-label', b ? 'Stop' : 'Send');
+}
+function chatDone() {
+  if (paintTimer) { clearTimeout(paintTimer); paintTimer = 0; }
+  setChatBusy(false);
+  chatReq = null;
+  persistChat();
+  renderChat(false);
+  var log = $('chatlog'); log.scrollTop = log.scrollHeight;
+}
+function sendChat() {
+  if (chatBusy) { return; }
+  var ta = $('chatIn'), text = trim(ta.value);
+  if (!text) { return; }
+  var spec = S.chatModel;
+  if (!specReady(spec)) { needSpec(spec); return; }
+  var ai = { role: 'assistant', text: '', pending: true };
+  chat.push({ role: 'user', text: text });
+  chat.push(ai);
+  ta.value = ''; autoGrow(ta);
+  renderChat(true);
+  setChatBusy(true);
+  chatReq = streamChat(spec, CHAT_SYSTEM, historyMsgs(chat.slice(0, chat.length - 1)), 16000, {
+    onText: function (d, full) { ai.text = full; schedulePaint(); },
+    onDone: function (st) {
+      ai.pending = false;
+      if (st.refused) {
+        ai.text = trim(ai.text) ? ai.text + '\n\n(The model stopped early on a safety filter.)' : 'The model declined this request. Try rewording it.';
+      }
+      if (st.cut) { ai.text += '\n\n(Cut off at the length limit. Ask me to continue.)'; }
+      chatDone();
+    },
+    onError: function (msg, st, aborted) {
+      ai.pending = false;
+      if (aborted) { if (!trim(ai.text)) { ai.error = 'Stopped.'; } } else { ai.error = msg; }
+      chatDone();
+    }
+  });
+}
+function newChat() {
+  if (chatReq) { chatReq.abort(); }
+  chat = []; persistChat(); renderChat(true);
+}
+
+/* route a tap from chat (or a chip) to the right tool */
+function runAction(kind, prompt, start) {
+  if (kind === 'image') { $('imgPrompt').value = prompt; go('image'); if (start) { makeImage(); } }
+  else if (kind === 'video') { $('vidPrompt').value = prompt; go('video'); if (start) { makeVideo(); } }
+  else { $('bldPrompt').value = prompt; go('build'); if (start) { makeBuild(); } }
+}
+
+/* ================= prompt helper ================= */
+var IMPROVE = {
+  image: 'Rewrite the user\'s idea as one detailed prompt for an image generator. Cover subject, setting, composition, art style, lighting, and color palette. Plain sentences, under 90 words. Output only the prompt: no preamble, no quotes, no markdown.',
+  video: 'Rewrite the user\'s idea as one detailed prompt for a video generator. Cover the subject, the action beats in order, camera movement, setting, lighting, style, and any dialogue or sound. Plain sentences, under 120 words. Output only the prompt: no preamble, no quotes, no markdown.'
+};
+function improvePrompt(kind, ta, btn) {
+  var idea = trim(ta.value);
+  if (!idea) { toast('Type a rough idea first.'); return; }
+  var original = ta.value;
+  setBusy(btn, true, 'Writing\u2026');
+  streamChat(helperSpec(), IMPROVE[kind], [{ role: 'user', content: idea }], 6000, {
+    onText: function (d, full) { ta.value = trim(full); },
+    onDone: function () {
+      setBusy(btn, false);
+      if (!trim(ta.value)) { ta.value = original; toast('Nothing came back. Try again.'); }
+    },
+    onError: function (m) { ta.value = original; setBusy(btn, false); toast(m || 'Could not improve the prompt.'); }
+  });
+}
+
+/* ================= images ================= */
+var imgShape = 'square', imgBusy = false;
+var OPENAI_SIZE = { square: '1024x1024', portrait: '1024x1536', landscape: '1536x1024' };
+var G_RATIO = { square: '1:1', portrait: '3:4', landscape: '4:3' };
+var G_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+function gHeaders() { return { 'Content-Type': 'application/json', 'x-goog-api-key': S.googleKey }; }
+function extOf(mime) { return /jpe?g/.test(mime) ? '.jpg' : (/webp/.test(mime) ? '.webp' : '.png'); }
+function addBtn(row, label, fn, hot) {
+  var b = mk('button', hot ? 'hot' : '', esc(label)); b.type = 'button'; on(b, 'click', fn); row.appendChild(b); return b;
+}
+
+function genOpenAIImage(p, shape, ok, fail) {
+  http({
+    method: 'POST', url: 'https://api.openai.com/v1/images/generations',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.openaiKey },
+    body: JSON.stringify({ model: S.openaiImageModel, prompt: p, size: OPENAI_SIZE[shape], n: 1 }),
+    timeout: 300000,
+    done: function (err, x) {
+      if (err) { fail(err.message); return; }
+      var j = parseJSON(x), d = j && j.data && j.data[0];
+      if (d && d.b64_json) { ok(d.b64_json, 'image/png'); }
+      else if (d && d.url) { ok(null, 'image/png', d.url); }
+      else { fail('No image came back. The prompt may have been filtered.'); }
+    }
+  });
+}
+function genGoogleImage(p, shape, ok, fail) {
+  var model = S.googleImageModel, isGem = model.indexOf('gemini') === 0;
+  var url = G_BASE + '/models/' + model + (isGem ? ':generateContent' : ':predict');
+  var body = isGem
+    ? { contents: [{ parts: [{ text: p + ' (aspect ratio ' + G_RATIO[shape] + ')' }] }], generationConfig: { responseModalities: ['TEXT', 'IMAGE'] } }
+    : { instances: [{ prompt: p }], parameters: { sampleCount: 1, aspectRatio: G_RATIO[shape] } };
+  http({
+    method: 'POST', url: url, headers: gHeaders(), body: JSON.stringify(body), timeout: 300000,
+    done: function (err, x) {
+      if (err) { fail(err.message); return; }
+      var j = parseJSON(x) || {};
+      if (isGem) {
+        var parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+        for (var i = 0; i < parts.length; i++) {
+          var id = parts[i].inlineData;
+          if (id && id.data) { ok(id.data, id.mimeType || 'image/png'); return; }
+        }
+      } else {
+        var pr = j.predictions && j.predictions[0];
+        if (pr && pr.bytesBase64Encoded) { ok(pr.bytesBase64Encoded, pr.mimeType || 'image/png'); return; }
+      }
+      fail('No image came back. The prompt may have been filtered.');
+    }
+  });
+}
+
+function imagePanel(item) {
+  var pn = mk('div', 'panel slam' + (item.shape === 'landscape' ? ' wide' : ''));
+  var im = new Image();
+  im.alt = item.prompt; im.src = item.src;
+  pn.appendChild(im);
+  pn.appendChild(mk('div', 'cap', esc(item.prompt)));
+  var bt = mk('div', 'pbtns');
+  var name = 'forge-' + slug(item.prompt) + extOf(item.mime);
+  addBtn(bt, 'Save', function () {
+    if (item.b64) { saveBlob(b64ToBlob(item.b64, item.mime), name); } else { window.open(item.src, '_blank'); }
+  });
+  addBtn(bt, 'Share', function () {
+    if (item.b64) { shareBlob(b64ToBlob(item.b64, item.mime), name, item.mime, item.prompt); } else { toast('Use Save for this image.'); }
+  });
+  if (item.b64) {
+    addBtn(bt, 'Animate', function () {
+      vidStart = { b64: item.b64, mime: item.mime };
+      renderStart();
+      if (!trim($('vidPrompt').value)) { $('vidPrompt').value = item.prompt; }
+      go('video');
+      toast('Image set as the first frame.');
+    });
+  }
+  pn.appendChild(bt);
+  return pn;
+}
+
+var SHAPE_RATIO = { square: { w: 1, h: 1 }, portrait: { w: 2, h: 3 }, landscape: { w: 3, h: 2 } };
+function genPuterImage(p, shape, ok, fail) {
+  puterReady(function (err) {
+    if (err) { fail(errMsg(err)); return; }
+    var model = S.puterImageModel, opts = { model: model, quality: 'medium' }, prompt = p;
+    if (/^gpt-image-1/.test(model)) { prompt = p + ' (' + shape + ' composition)'; } else { opts.ratio = SHAPE_RATIO[shape]; }
+    var pr;
+    try { pr = window.puter.ai.txt2img(prompt, opts); } catch (e) { fail(puterErr(e)); return; }
+    Promise.resolve(pr).then(function (img) {
+      var src = img && (img.src || String(img));
+      var m = /^data:([^;,]+);base64,/.exec(src || '');
+      if (m) { ok(src.substring(m[0].length), m[1]); }
+      else if (src) { ok(null, 'image/png', src); }
+      else { fail('No image came back.'); }
+    }, function (e2) { fail(puterErr(e2)); });
+  });
+}
+
+function makeImage() {
+  if (imgBusy) { return; }
+  var p = trim($('imgPrompt').value);
+  if (!p) { toast('Describe the image first.'); return; }
+  var prov = $('imgProv').value;
+  S.imageProvider = prov; save('forge.settings', S);
+  if (!haveKey(prov)) { needKey(prov); return; }
+  imgBusy = true;
+  setBusy($('imgGo'), true, 'Making image\u2026');
+  var shape = imgShape;
+  var pn = pendingPanel('Making your image', shape === 'landscape');
+  prepend(ensureGallery($('imgOut')), pn);
+  reveal(pn);
+  function fail(m) { imgBusy = false; setBusy($('imgGo'), false); failPanel(pn, 'Image failed', m); }
+  function ok(b64, mime, url) {
+    imgBusy = false; setBusy($('imgGo'), false);
+    var mm = mime || 'image/png';
+    var done = imagePanel({ prompt: p, shape: shape, b64: b64, mime: mm, src: b64 ? 'data:' + mm + ';base64,' + b64 : url });
+    if (pn.parentNode) { pn.parentNode.replaceChild(done, pn); }
+    toast('Image ready.');
+  }
+  if (prov === 'puter') { genPuterImage(p, shape, ok, fail); }
+  else if (prov === 'openai') { genOpenAIImage(p, shape, ok, fail); }
+  else { genGoogleImage(p, shape, ok, fail); }
+}
+
+/* ================= video (Google Veo) ================= */
+var vidShape = '16:9', vidLen = 4, vidStart = null, vidBusy = false;
+
+function renderStart() {
+  var b = $('vidStart');
+  b.innerHTML = '';
+  if (!vidStart) {
+    b.appendChild(mk('span', '', 'No first frame. The video starts from your prompt.'));
+    var pick = mk('button', 'btn small', 'Choose image'); pick.type = 'button';
+    on(pick, 'click', function () { $('vidFile').click(); });
+    b.appendChild(pick);
+  } else {
+    var im = new Image(); im.alt = ''; im.src = 'data:' + vidStart.mime + ';base64,' + vidStart.b64;
+    b.appendChild(im);
+    b.appendChild(mk('span', '', 'The video starts from this image.'));
+    var rm = mk('button', 'btn small', 'Remove'); rm.type = 'button';
+    on(rm, 'click', function () { vidStart = null; renderStart(); });
+    b.appendChild(rm);
+  }
+}
+function vidEnd() { vidBusy = false; setBusy($('vidGo'), false); }
+
+function videoJob() {
+  var pn = mk('div', 'panel wide job slam');
+  pn.innerHTML = '<div class="jobbody"><strong>Making your video</strong><div class="js">Sending to Google\u2026</div><div class="stripe"></div><p class="jm note"></p></div><div class="pbtns"><button type="button" class="jstop">Stop waiting</button></div>';
+  prepend(ensureGallery($('vidOut')), pn);
+  reveal(pn);
+  var t0 = nowMs();
+  var job = { pn: pn, cancelled: false, timer: 0, req: null, iv: 0 };
+  job.status = function (s) { pn.querySelector('.js').textContent = s; };
+  job.elapsed = function () { return Math.round((nowMs() - t0) / 1000); };
+  job.stop = function () { clearInterval(job.iv); clearTimeout(job.timer); };
+  job.fail = function (m) { job.stop(); failPanel(pn, 'Video failed', m); vidEnd(); };
+  job.iv = setInterval(function () { pn.querySelector('.jm').textContent = 'Elapsed ' + fmtSecs(job.elapsed()); }, 1000);
+  on(pn.querySelector('.jstop'), 'click', function () {
+    job.cancelled = true; job.stop();
+    if (job.req) { job.req.abort(); }
+    removeNode(pn); vidEnd();
+    toast('Stopped waiting. Google may still finish this clip and bill for it.');
+  });
+  return job;
+}
+
+function videoPanel(res, prompt) {
+  var pn = mk('div', 'panel wide slam');
+  var v = document.createElement('video');
+  v.controls = true; v.setAttribute('playsinline', ''); v.preload = 'metadata'; v.src = res.src;
+  pn.appendChild(v);
+  pn.appendChild(mk('div', 'cap', esc(prompt)));
+  var bt = mk('div', 'pbtns'), name = 'forge-' + slug(prompt) + '.mp4';
+  addBtn(bt, 'Save', function () { if (res.blob) { saveBlob(res.blob, name); } else { window.open(res.src, '_blank'); } });
+  addBtn(bt, 'Share', function () { if (res.blob) { shareBlob(res.blob, name, 'video/mp4', prompt); } else { toast('Use Save for this clip.'); } });
+  pn.appendChild(bt);
+  return pn;
+}
+
+function finishVideo(j, job, prompt) {
+  var r = j.response || {};
+  var gv = r.generateVideoResponse || r;
+  var s = (gv.generatedSamples || gv.generatedVideos || [])[0];
+  var v = s && (s.video || s);
+  var uri = v && (v.uri || v.videoUri);
+  if (!uri) {
+    var why = gv.raiMediaFilteredReasons;
+    job.fail(why && why.length ? 'Google filtered this video: ' + why.join(' ') : 'No video came back. The prompt may have been filtered.');
+    return;
+  }
+  job.status('Downloading the clip\u2026');
+  http({
+    method: 'GET', url: uri, headers: { 'x-goog-api-key': S.googleKey }, blob: true, timeout: 300000,
+    done: function (err, x) {
+      if (job.cancelled) { return; }
+      var res;
+      if (!err && x.response) { res = { blob: x.response, src: URL.createObjectURL(x.response) }; }
+      else { res = { blob: null, src: uri + (uri.indexOf('?') > -1 ? '&' : '?') + 'key=' + encodeURIComponent(S.googleKey) }; }
+      job.stop();
+      var panel = videoPanel(res, prompt);
+      if (job.pn.parentNode) { job.pn.parentNode.replaceChild(panel, job.pn); }
+      vidEnd();
+      toast('Video ready.');
+    }
+  });
+}
+
+function pollVideo(name, job, n, prompt) {
+  if (job.cancelled) { return; }
+  job.timer = setTimeout(function () {
+    if (job.cancelled) { return; }
+    if (job.elapsed() > 900) { job.fail('Still running after 15 minutes. Google may still finish it. Check your Google AI account.'); return; }
+    job.req = http({
+      method: 'GET', url: G_BASE + '/' + name, headers: gHeaders(), timeout: 60000,
+      done: function (err, x) {
+        if (job.cancelled) { return; }
+        if (err) {
+          if (err.status === 0 || err.status >= 500) { pollVideo(name, job, n + 1, prompt); return; }
+          job.fail(err.message); return;
+        }
+        var j = parseJSON(x);
+        if (!j) { pollVideo(name, job, n + 1, prompt); return; }
+        if (j.error) { job.fail(j.error.message || 'Google could not make this video.'); return; }
+        if (!j.done) { job.status('Rendering. Checking every 10 seconds.'); pollVideo(name, job, n + 1, prompt); return; }
+        finishVideo(j, job, prompt);
+      }
+    });
+  }, n === 0 ? 4000 : 10000);
+}
+
+function startGoogleVideo(p) {
+  vidBusy = true;
+  setBusy($('vidGo'), true, 'Making video\u2026');
+  var job = videoJob();
+  var inst = { prompt: p };
+  if (vidStart) { inst.image = { bytesBase64Encoded: vidStart.b64, mimeType: vidStart.mime }; }
+  http({
+    method: 'POST', url: G_BASE + '/models/' + S.googleVideoModel + ':predictLongRunning',
+    headers: gHeaders(), body: JSON.stringify({ instances: [inst], parameters: { aspectRatio: vidShape } }), timeout: 180000,
+    done: function (err, x) {
+      if (job.cancelled) { return; }
+      if (err) { job.fail(err.message); return; }
+      var j = parseJSON(x);
+      if (!j || !j.name) { job.fail('Google did not return a job. Check the video model name in Settings.'); return; }
+      job.status('Queued. Checking every 10 seconds.');
+      pollVideo(j.name, job, 0, p);
+    }
+  });
+}
+
+function fetchBlob(url, cb) {
+  if (url.indexOf('data:') === 0) {
+    try {
+      var comma = url.indexOf(','), mime = /^data:([^;,]+)/.exec(url)[1];
+      cb(b64ToBlob(url.substring(comma + 1), mime));
+    } catch (e) { cb(null); }
+    return;
+  }
+  http({ method: 'GET', url: url, blob: true, timeout: 300000, done: function (err, x) { cb(!err && x.response ? x.response : null); } });
+}
+
+function startPuterVideo(p) {
+  vidBusy = true;
+  setBusy($('vidGo'), true, 'Making video\u2026');
+  var job = videoJob();
+  job.status('Signing in to Puter\u2026');
+  puterReady(function (err) {
+    if (job.cancelled) { return; }
+    if (err) { job.fail(errMsg(err)); return; }
+    job.status('Rendering. This can take a few minutes.');
+    var opts = { model: S.puterVideoModel, seconds: vidLen, size: vidShape === '9:16' ? '720x1280' : '1280x720' };
+    if (vidStart) { opts.input_reference = 'data:' + vidStart.mime + ';base64,' + vidStart.b64; }
+    var pr;
+    try { pr = window.puter.ai.txt2vid(p, opts); } catch (e) { job.fail(puterErr(e)); return; }
+    Promise.resolve(pr).then(function (video) {
+      if (job.cancelled) { return; }
+      var src = video && (video.src || String(video));
+      if (!src) { job.fail('No video came back.'); return; }
+      job.status('Downloading the clip\u2026');
+      fetchBlob(src, function (blob) {
+        if (job.cancelled) { return; }
+        var res = blob ? { blob: blob, src: URL.createObjectURL(blob) } : { blob: null, src: src };
+        job.stop();
+        var panel = videoPanel(res, p);
+        if (job.pn.parentNode) { job.pn.parentNode.replaceChild(panel, job.pn); }
+        vidEnd();
+        toast('Video ready.');
+      });
+    }, function (e2) { if (job.cancelled) { return; } job.fail(puterErr(e2)); });
+  });
+}
+
+function makeVideo() {
+  if (vidBusy) { return; }
+  var p = trim($('vidPrompt').value);
+  if (!p) { toast('Describe what happens first.'); return; }
+  var prov = $('vidProv').value;
+  S.videoProvider = prov; save('forge.settings', S);
+  if (prov === 'google') {
+    if (!haveKey('google')) { needKey('google'); return; }
+    confirmSheet('Make this video?', 'Google bills each clip to your account. Video costs more than images and takes a few minutes.', 'Make video', function () { startGoogleVideo(p); });
+  } else {
+    confirmSheet('Make this video?', 'Video uses the most of your free Puter credit. A ' + vidLen + ' second clip takes a few minutes.', 'Make video', function () { startPuterVideo(p); });
+  }
+}
+
+/* ================= Play: run projects made in other tools ================= */
+var THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/';
+
+var ENGINES = [
+  { id: 'web', name: 'Web (HTML, JS)', kind: 'web', accept: '.zip,.html,.htm', pick: 'Choose a .zip or an .html file',
+    note: 'Runs games and apps made with HTML, JavaScript, Canvas, Phaser, Three.js, p5.js, PixiJS, GDevelop, Construct, and other web tools.',
+    help: ['Zip the folder that holds index.html, or pick a single .html file.', 'Files load from inside the zip, so paths like assets/player.png work.', 'The project runs in a sandbox and cannot touch Forge data. Its saves stay in this browser.'] },
+  { id: 'godot', name: 'Godot 4', kind: 'godot', accept: '.zip', pick: 'Choose your Godot web export (.zip)',
+    note: 'Runs a Godot 4 project after it has been exported for the web. The source project cannot run directly.',
+    help: ['In Godot, open Project, Export, and add a Web preset.', 'Turn Thread Support off. This needs Godot 4.3 or newer.', 'Export, then zip the export folder. It holds index.html, index.js, index.wasm, and index.pck.', 'Choose the zip here. Big exports take a while to unpack.'] },
+  { id: 'unity', name: 'Unity', kind: 'unity', accept: '.zip', pick: 'Choose your Unity web build (.zip)',
+    note: 'Runs a Unity project after it has been built for the web.',
+    help: ['In Unity, open Build Profiles and choose Web.', 'In Publishing Settings, set Compression Format to Disabled or Gzip. Brotli will not work.', 'Build, then zip the build folder. It holds index.html and a Build folder.', 'Choose the zip here.'] },
+  { id: 'blender', name: 'Blender (3D)', kind: 'model', accept: '.glb,.gltf,.zip', pick: 'Choose a .glb file',
+    note: 'Shows a 3D model with orbit controls and plays its animations. Blender projects cannot run directly, so export them as glTF.',
+    help: ['In Blender, choose File, Export, glTF 2.0.', 'Pick glTF Binary (.glb). It keeps the textures inside the file.', 'Choose that file here. Drag to look around and pinch to zoom.', 'The 3D viewer loads from the internet, so you need a connection.'] },
+  { id: 'unreal', name: 'Unreal', kind: 'none', accept: '', pick: '',
+    note: 'Unreal projects cannot run in a phone browser. Unreal Engine 5 dropped web export.',
+    help: ['Package the project for Android in Unreal, then install the APK on your phone.', 'Or stream it from a computer with Pixel Streaming and open the link in Chrome.', 'Forge can still write Unreal C++ classes and Blueprint steps in the Build tab.'] },
+  { id: 'python', name: 'Python (pygame)', kind: 'web', accept: '.zip', pick: 'Choose your pygbag web export (.zip)',
+    note: 'Runs a pygame project after it has been exported to the web with pygbag. Best effort.',
+    help: ['On a computer, run: pygbag --build your_folder', 'Zip the build/web folder that pygbag makes.', 'Choose the zip here. It needs an internet connection to load Python.'] },
+  { id: 'love', name: 'LOVE (Lua)', kind: 'web', accept: '.zip', pick: 'Choose your love.js export (.zip)',
+    note: 'Runs a LOVE game after it has been exported with love.js. Best effort.',
+    help: ['Export the game with love.js. Use the compatibility build, which needs no threads.', 'Zip the export folder that holds index.html.', 'Choose the zip here.'] },
+  { id: 'roblox', name: 'Roblox', kind: 'none', accept: '', pick: '',
+    note: 'Roblox games only run inside Roblox.',
+    help: ['Publish from Roblox Studio, then play from the Roblox app.', 'Forge can still write Luau scripts in the Build tab.'] }
+];
+var PL = { engine: 'web', name: '', size: 0, buf: null };
+var RN = { frame: null, proj: null, token: 0, timer: 0, lines: [], bad: 0, model: null, hints: {} };
+
+function engineById(id) {
+  for (var i = 0; i < ENGINES.length; i++) { if (ENGINES[i].id === id) { return ENGINES[i]; } }
+  return ENGINES[0];
+}
+function fmtBytes(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+function hashOf(s) {
+  var h = 5381;
+  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+  return (h >>> 0).toString(36);
+}
+
+/* ---------- picker ---------- */
+function renderEngines() {
+  var box = $('engChips');
+  box.innerHTML = '';
+  each(ENGINES, function (eng) {
+    var c = mk('button', 'chip' + (eng.id === PL.engine ? ' on' : ''), esc(eng.name)); c.type = 'button';
+    on(c, 'click', function () { PL.engine = eng.id; renderEngines(); });
+    box.appendChild(c);
+  });
+  var cur = engineById(PL.engine);
+  $('engNote').textContent = cur.note;
+  var li = '';
+  each(cur.help, function (h) { li += '<li>' + esc(h) + '</li>'; });
+  $('engHelp').innerHTML = '<h3 style="margin-top:0">' + (cur.kind === 'none' ? 'What you can do instead' : 'Get your project ready') + '</h3><ol style="margin:0;padding-left:22px">' + li + '</ol>';
+  var runnable = cur.kind !== 'none';
+  $('engFileWrap').style.display = runnable ? '' : 'none';
+  $('engRun').style.display = runnable ? '' : 'none';
+  $('engRun').textContent = cur.kind === 'model' ? 'Open 3D model' : 'Run project';
+  $('engFile').setAttribute('accept', cur.accept || '');
+  renderEngineFile();
+}
+function renderEngineFile() {
+  var b = $('engFileBox'), cur = engineById(PL.engine);
+  b.innerHTML = '';
+  $('engFileLbl').textContent = cur.pick || 'Project';
+  if (PL.name) {
+    b.appendChild(mk('span', '', '<strong>' + esc(PL.name) + '</strong><br>' + fmtBytes(PL.size)));
+    var ch = mk('button', 'btn small', 'Change'); ch.type = 'button';
+    on(ch, 'click', function () { $('engFile').click(); });
+    b.appendChild(ch);
+  } else {
+    b.appendChild(mk('span', '', 'No file chosen yet.'));
+    var pk = mk('button', 'btn small', 'Choose file'); pk.type = 'button';
+    on(pk, 'click', function () { $('engFile').click(); });
+    b.appendChild(pk);
+  }
+}
+function onEngineFile() {
+  var input = $('engFile'), f = input.files && input.files[0];
+  if (!f) { return; }
+  var rd = new FileReader();
+  rd.onload = function () { PL.buf = rd.result; PL.name = f.name; PL.size = f.size; renderEngineFile(); };
+  rd.onerror = function () { toast('Could not read that file.'); };
+  rd.readAsArrayBuffer(f);
+  input.value = '';
+}
+
+/* ---------- zip reading (no libraries) ---------- */
+function zipSig(buf) { return buf.byteLength > 3 && new DataView(buf).getUint32(0, true) === 0x04034b50; }
+function decodeName(bytes, flags) {
+  try { return new TextDecoder('utf-8').decode(bytes); } catch (e) { return String.fromCharCode.apply(null, bytes); }
+}
+function zipEntries(buf) {
+  var dv = new DataView(buf), n = buf.byteLength, eocd = -1, i;
+  for (i = n - 22; i >= Math.max(0, n - 22 - 65535); i--) { if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; } }
+  if (eocd < 0) { throw new Error('This does not look like a zip file.'); }
+  var count = dv.getUint16(eocd + 10, true), cdOff = dv.getUint32(eocd + 16, true);
+  if (count === 0xFFFF || cdOff === 0xFFFFFFFF) { throw new Error('Zip files over 4 GB are not supported.'); }
+  var out = [], p = cdOff;
+  for (var k = 0; k < count; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) { throw new Error('The zip file looks damaged.'); }
+    var flags = dv.getUint16(p + 8, true), method = dv.getUint16(p + 10, true);
+    var csize = dv.getUint32(p + 20, true);
+    var nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true);
+    var lho = dv.getUint32(p + 42, true);
+    out.push({ name: decodeName(new Uint8Array(buf, p + 46, nl), flags), method: method, csize: csize, lho: lho });
+    p += 46 + nl + el + cl;
+  }
+  return out;
+}
+function entryBytes(buf, e) {
+  var dv = new DataView(buf);
+  if (dv.getUint32(e.lho, true) !== 0x04034b50) { throw new Error('The zip file looks damaged.'); }
+  var start = e.lho + 30 + dv.getUint16(e.lho + 26, true) + dv.getUint16(e.lho + 28, true);
+  return new Uint8Array(buf, start, e.csize);
+}
+function inflateRaw(u8, cb) {
+  if (typeof DecompressionStream === 'undefined') { cb('This browser cannot unpack compressed zips. Update Chrome, or zip the project with no compression.'); return; }
+  try {
+    var stream = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    new Response(stream).arrayBuffer().then(function (ab) { cb(null, ab); }, function (e) { cb('Could not unpack a file in the zip: ' + errMsg(e)); });
+  } catch (e2) { cb('Could not unpack the zip: ' + errMsg(e2)); }
+}
+function stripRoot(list) {
+  if (!list.length) { return list; }
+  var first = list[0][0].split('/')[0], i;
+  for (i = 0; i < list.length; i++) {
+    var segs = list[i][0].split('/');
+    if (segs.length < 2 || segs[0] !== first) { return list; }
+  }
+  var out = [];
+  for (i = 0; i < list.length; i++) { out.push([list[i][0].substring(first.length + 1), list[i][1]]); }
+  return out;
+}
+/* cb(error, [[path, ArrayBuffer], ...]) */
+function unzip(buf, progress, cb) {
+  var list;
+  try { list = zipEntries(buf); } catch (e) { cb(errMsg(e)); return; }
+  var out = [], i = 0;
+  function next() {
+    if (i >= list.length) { cb(null, stripRoot(out)); return; }
+    var en = list[i++];
+    if (/\/$/.test(en.name) || /(^|\/)(__MACOSX\/|\.DS_Store$)/.test(en.name)) { next(); return; }
+    progress(i, list.length);
+    var raw;
+    try { raw = entryBytes(buf, en); } catch (x) { cb(errMsg(x)); return; }
+    if (en.method === 0) { out.push([en.name, raw.slice().buffer]); setTimeout(next, 0); }
+    else if (en.method === 8) {
+      inflateRaw(raw, function (err, ab) { if (err) { cb(err); return; } out.push([en.name, ab]); next(); });
+    } else { cb('This zip uses a compression method Forge cannot open. Zip it again with normal compression.'); }
+  }
+  next();
+}
+
+/* ---------- picking the entry file and checking engine exports ---------- */
+function pickEntry(files, kind) {
+  var want = kind === 'model' ? /\.(glb|gltf)$/i : /\.html?$/i, best = null, bestScore = 1e9;
+  each(files, function (f) {
+    if (!want.test(f[0])) { return; }
+    var score = f[0].split('/').length * 10;
+    if (kind === 'model') { if (/\.glb$/i.test(f[0])) { score -= 5; } }
+    else if (/(^|\/)index\.html?$/i.test(f[0])) { score -= 5; }
+    if (score < bestScore) { bestScore = score; best = f; }
+  });
+  return best;
+}
+function checkProject(kind, files) {
+  var names = [];
+  each(files, function (f) { names.push(f[0].toLowerCase()); });
+  function has(re) { for (var i = 0; i < names.length; i++) { if (re.test(names[i])) { return true; } } return false; }
+  if (kind === 'godot' && (!has(/\.pck$/) || !has(/\.wasm$/))) {
+    return 'This zip does not look like a Godot web export. It should hold index.html, index.js, index.wasm, and index.pck. Export with the Web preset, then zip that folder.';
+  }
+  if (kind === 'unity') {
+    if (has(/\.br$/)) { return 'This Unity build is Brotli compressed, which cannot be unpacked here. In Unity, set Compression Format to Disabled or Gzip, then build again.'; }
+    if (!has(/\.loader\.js$/)) { return 'This zip does not look like a Unity web build. It should hold index.html and a Build folder with .loader.js, .framework.js, .data, and .wasm files.'; }
+  }
+  return null;
+}
+
+/* ---------- the player overlay ---------- */
+function shellHtml() {
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<style>html,body{margin:0;height:100%;background:#000}</style><script>' + $('srcShim').textContent + '<' + '/script></head><body></body></html>';
+}
+function modelHtml() {
+  var map = { imports: { 'three': THREE_URL + 'build/three.module.js', 'three/addons/': THREE_URL + 'examples/jsm/' } };
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<style>html,body{margin:0;height:100%;overflow:hidden;background:#1b1a3a;color:#fff;font-family:system-ui,sans-serif}canvas{display:block;touch-action:none}' +
+    '#note{position:fixed;left:12px;right:12px;top:12px;font-weight:700}' +
+    '#ui{position:fixed;left:10px;right:10px;bottom:10px;display:flex;gap:8px;flex-wrap:wrap}' +
+    '#ui button,#ui select{min-height:44px;padding:0 14px;border:2px solid #fff;border-radius:10px;background:#16143A;color:#fff;font:700 15px system-ui,sans-serif}</style>' +
+    '<script type="importmap">' + JSON.stringify(map) + '<' + '/script></head><body><div id="note">Loading the 3D viewer\u2026</div><div id="ui"></div>' +
+    "<script type=\"module\" onerror=\"parent.postMessage({forge:'model-fail',msg:'Could not load the 3D viewer. Check your internet connection.'},'*')\">" +
+    $('srcModel').textContent + '<' + '/script></body></html>';
+}
+function removeFrame() {
+  if (RN.frame) { removeNode(RN.frame); RN.frame = null; }
+}
+function newFrame(sandbox, srcdoc, onload) {
+  removeFrame();
+  var fr = document.createElement('iframe');
+  fr.setAttribute('sandbox', sandbox);
+  fr.setAttribute('allow', 'autoplay; fullscreen; gamepad; accelerometer; gyroscope');
+  fr.setAttribute('allowfullscreen', '');
+  fr.title = 'Project';
+  if (onload) { on(fr, 'load', onload); }
+  fr.srcdoc = srcdoc;
+  RN.frame = fr;
+  $('rnHost').appendChild(fr);
+  return fr;
+}
+function loadingShow(msg) { var l = $('rnLoad'); l.style.display = 'flex'; l.textContent = msg; }
+function loadingHide() { $('rnLoad').style.display = 'none'; }
+function runnerFail(msg) {
+  clearTimeout(RN.timer);
+  RN.model = null;
+  removeFrame();
+  loadingShow(msg);
+}
+
+function setLogBadge() { $('rnLogBtn').textContent = RN.bad ? 'Log (' + RN.bad + ')' : 'Log'; }
+function renderLog() {
+  var el = $('rnLog');
+  el.textContent = RN.lines.slice(-200).join('\n');
+  el.scrollTop = el.scrollHeight;
+}
+function addLog(level, text) {
+  RN.lines.push((level === 'error' ? 'error: ' : (level === 'warn' ? 'warning: ' : '')) + text);
+  if (RN.lines.length > 400) { RN.lines.shift(); }
+  if (level === 'error' || level === 'warn') { RN.bad++; setLogBadge(); }
+  if ($('rnLog').className.indexOf(' on') > -1) { renderLog(); }
+  hintFor(text);
+}
+function runnerHint(key, msg) {
+  if (RN.hints[key]) { return; }
+  RN.hints[key] = true;
+  $('rnHintMsg').textContent = msg;
+  $('rnHint').className = 'pv-err on';
+}
+function hintFor(text) {
+  if (/cross-?origin isolation|SharedArrayBuffer/i.test(text)) {
+    runnerHint('sab', RN.proj && RN.proj.kind === 'godot'
+      ? 'This Godot export needs threads. Export it again with Thread Support turned off (Godot 4.3 or newer).'
+      : 'This project needs threads (SharedArrayBuffer), which a sandbox cannot give it. Build a single-thread version.');
+  } else if (/indexeddb/i.test(text)) {
+    runnerHint('idb', 'This project tried to use IndexedDB storage, which the sandbox blocks. It may run, but it cannot keep saves there.');
+  }
+}
+function loadSave(id) { return load('forge.save.' + id, {}); }
+function saveSave(id, data) {
+  try {
+    if (JSON.stringify(data).length > 1000000) { addLog('warn', 'Save data is too big to keep.'); return; }
+    save('forge.save.' + id, data);
+  } catch (e) {}
+}
+
+function launchWeb(files, entry, p, token) {
+  loadingShow('Starting\u2026');
+  var sent = false;
+  newFrame('allow-scripts allow-pointer-lock allow-modals', shellHtml(), function () {
+    if (sent || token !== RN.token) { return; }
+    sent = true;
+    var list = [], transfers = [];
+    each(files, function (f) { list.push([f[0], f[1]]); transfers.push(f[1]); });
+    RN.frame.contentWindow.postMessage({ forge: 'load', entry: entry[0], files: list, storage: loadSave(p.id) }, '*', transfers);
+    RN.timer = setTimeout(function () {
+      if (token === RN.token && $('rnLoad').style.display !== 'none') { addLog('warn', 'Still starting. Big projects can take a while.'); }
+    }, 15000);
+  });
+}
+function launchModel(files, entry, token) {
+  loadingShow('Loading the 3D viewer\u2026');
+  RN.model = { files: files, entry: entry[0], token: token };
+  newFrame('allow-scripts', modelHtml(), null);
+  RN.timer = setTimeout(function () {
+    if (token === RN.token && RN.model) { runnerFail('Could not load the 3D viewer. It needs an internet connection. Check yours and try again.'); }
+  }, 25000);
+}
+function startRunner(p) {
+  RN.proj = p; RN.token++;
+  var token = RN.token;
+  clearTimeout(RN.timer);
+  RN.lines = []; RN.bad = 0; RN.hints = {}; RN.model = null;
+  setLogBadge();
+  $('rnLog').className = 'rn-log';
+  $('rnHint').className = 'pv-err';
+  $('rnTitle').textContent = p.title;
+  $('toast').className = '';
+  $('rn').className = 'rn on';
+  removeFrame();
+  loadingShow('Unpacking\u2026');
+  p.unpack(function (err, files) {
+    if (token !== RN.token) { return; }
+    if (err) { runnerFail(err); return; }
+    var entry = pickEntry(files, p.kind);
+    if (!entry) { runnerFail(p.kind === 'model' ? 'No .glb or .gltf file found in this project.' : 'No index.html found in this project. Zip the folder that holds it.'); return; }
+    var bad = checkProject(p.kind, files);
+    if (bad) { runnerFail(bad); return; }
+    if (p.kind === 'model') { launchModel(files, entry, token); } else { launchWeb(files, entry, p, token); }
+  });
+}
+function closeRunner() {
+  RN.token++;
+  clearTimeout(RN.timer);
+  RN.model = null;
+  removeFrame();
+  try { if (document.fullscreenElement) { document.exitFullscreen(); } } catch (e) {}
+  $('rn').className = 'rn';
+}
+function toggleFull() {
+  var el = $('rn');
+  try {
+    if (document.fullscreenElement) { document.exitFullscreen(); }
+    else if (el.requestFullscreen) { el.requestFullscreen(); }
+    else { toast('Full screen is not available here.'); }
+  } catch (e) { toast('Full screen is not available here.'); }
+}
+function handleRunnerMessage(d) {
+  if (d.forge === 'log') { addLog(d.level, d.text); }
+  else if (d.forge === 'err') { addLog('error', d.msg); }
+  else if (d.forge === 'storage') { if (RN.proj) { saveSave(RN.proj.id, d.data); } }
+  else if (d.forge === 'ready') { loadingHide(); }
+  else if (d.forge === 'fail') { runnerFail(d.msg); }
+  else if (d.forge === 'viewer-ready') {
+    if (RN.model && RN.model.token === RN.token) {
+      clearTimeout(RN.timer);
+      var m = RN.model, list = [], transfers = [];
+      RN.model = null;
+      each(m.files, function (f) { list.push([f[0], f[1]]); transfers.push(f[1]); });
+      RN.frame.contentWindow.postMessage({ forge: 'model', entry: m.entry, files: list }, '*', transfers);
+    }
+  }
+  else if (d.forge === 'model-ready') { loadingHide(); }
+  else if (d.forge === 'model-fail') { runnerFail(d.msg); }
+}
+
+/* ---------- Forge builds you can run ---------- */
+function filesFromBuild(b) {
+  var out = [];
+  each(b.files, function (f) { out.push([f.name, utf8(f.text).buffer]); });
+  return out;
+}
+function renderPlaySaved() {
+  var box = $('playSaved');
+  box.innerHTML = '';
+  box.appendChild(mk('h3', '', 'Your Forge builds'));
+  var web = [];
+  each(builds, function (b) { if (b.target === 'web') { web.push(b); } });
+  if (!web.length) {
+    box.appendChild(mk('p', 'note', 'Web games and apps you build in the Build tab show up here so you can run them.'));
+  }
+  each(web, function (b) {
+    var row = mk('div', 'panel');
+    row.appendChild(mk('div', 'ttl', esc(b.title) + '<small>' + b.files.length + (b.files.length === 1 ? ' file' : ' files') + '</small>'));
+    var run = mk('button', 'btn small primary', 'Run'); run.type = 'button';
+    on(run, 'click', function () {
+      startRunner({ title: b.title, kind: 'web', engine: 'web', id: 'build-' + b.id, unpack: function (cb) { cb(null, filesFromBuild(b)); } });
+    });
+    row.appendChild(run);
+    box.appendChild(row);
+  });
+  box.appendChild(mk('p', 'note', 'Godot, Unity, Unreal, and Blender builds are source files. Export them from that tool first, then load the export above.'));
+}
+
+function runProject() {
+  var cur = engineById(PL.engine);
+  if (cur.kind === 'none') { return; }
+  if (!PL.buf) { toast('Choose a project file first.'); return; }
+  var name = PL.name, buf = PL.buf, isZip = /\.zip$/i.test(name) || zipSig(buf);
+  startRunner({
+    title: name, kind: cur.kind, engine: cur.id, id: 'p' + hashOf(name + ':' + PL.size),
+    unpack: function (cb) {
+      if (isZip) { unzip(buf, function (i, n) { $('rnLoad').textContent = 'Unpacking ' + i + ' of ' + n + '\u2026'; }, cb); }
+      else { setTimeout(function () { cb(null, [[name, buf.slice(0)]]); }, 0); }
+    }
+  });
+}
+
+function initPlay() {
+  renderEngines();
+  renderPlaySaved();
+  on($('engFile'), 'change', onEngineFile);
+  on($('engRun'), 'click', runProject);
+  on($('rnClose'), 'click', closeRunner);
+  on($('rnRestart'), 'click', function () { if (RN.proj) { startRunner(RN.proj); } });
+  on($('rnLogBtn'), 'click', function () {
+    var el = $('rnLog'), isOn = el.className.indexOf(' on') > -1;
+    el.className = 'rn-log' + (isOn ? '' : ' on');
+    if (!isOn) { renderLog(); }
+  });
+  on($('rnFull'), 'click', toggleFull);
+  on($('rnHintX'), 'click', function () { $('rnHint').className = 'pv-err'; });
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || !d.forge || !RN.frame || e.source !== RN.frame.contentWindow) { return; }
+    handleRunnerMessage(d);
+  }, false);
+}
+
+/* ================= build (apps and games) ================= */
+var ACODE_RULES = 'Write ES5-style JavaScript only: use var, function declarations, and function expressions. No arrow functions, no template literals, no classes, no let or const, no optional chaining, no spread, no modules, and no fetch.';
+
+var TARGETS = [
+  { id: 'web', name: 'Web game or app', note: 'Runs right here with Play. Touch controls are built in.',
+    spec: 'A single self-contained index.html with inline CSS and JavaScript that runs in a phone browser. No external requests: no CDN scripts, web fonts, or image files. Draw with canvas, CSS, or inline SVG, and make sound with WebAudio if needed. Touch first: on-screen buttons or a virtual joystick that also accept the keyboard, touch-action none on the play area, a layout that fits any screen size and orientation, a requestAnimationFrame loop with delta time, pause when the tab is hidden, and a restart button. Include the viewport meta tag.' },
+  { id: 'godot', name: 'Godot 4', note: 'Makes a project folder. Copy the files into a new Godot project, or zip them.',
+    spec: 'A Godot 4.x project in GDScript. Files: project.godot, a small Main.tscn, and .gd scripts. Prefer creating nodes in code over long hand-written scene files. Use touch input (InputEventScreenTouch and InputEventScreenDrag, or TouchScreenButton) so it works on Android. Set the window size and stretch mode in project.godot. Keep art procedural (ColorRect, Polygon2D, _draw). README.md: how to open it, the main scene, and how to export to Android.' },
+  { id: 'unity', name: 'Unity', note: 'Makes C# scripts plus editor steps. Add them to a Unity project.',
+    spec: 'Unity 6 or 2022 LTS with C#. MonoBehaviour scripts, one class per file, file name equal to the class name. README.md with exact editor steps to assemble the scene: which GameObjects to create, which scripts to attach, tags and layers. Touch input through Input.touches or the Input System Touchscreen. Create sprites and primitives in code so no outside assets are needed.' },
+  { id: 'unreal', name: 'Unreal', note: 'Makes C++ classes and Blueprint steps. Add them to an Unreal 5 project.',
+    spec: 'Unreal Engine 5 with C++. .h and .cpp files under Source/<ProjectName>/ with correct UCLASS, UPROPERTY, and GENERATED_BODY macros. Blueprints cannot be delivered as text, so put Blueprint steps in README.md as a numbered list wherever Blueprint is the natural tool. Optionally include an Editor Python script that uses the unreal module to spawn actors or assets.' },
+  { id: 'blender', name: 'Blender', note: 'Makes a Python script. Run it in Blender\'s Scripting workspace.',
+    spec: 'Blender 4.x Python. A script build_scene.py that uses bpy to build the requested scene, model, or animation procedurally: mesh primitives, modifiers, node-based materials, keyframes, camera, lights, and render settings. Put everything it creates in a collection named Forge and clear only that collection when re-run. Comment each stage. README.md: how to run it (Scripting workspace, Open, Run Script) and how to render or export (glTF or FBX).' },
+  { id: 'roblox', name: 'Roblox', note: 'Makes Luau scripts and says where each one goes in Studio.',
+    spec: 'Roblox Studio with Luau. One file per script: Name.server.lua for a Script, Name.client.lua for a LocalScript, Name.lua for a ModuleScript. README.md says where each one goes (ServerScriptService, StarterPlayerScripts, ReplicatedStorage). Build parts with Instance.new so no manual modeling is needed.' },
+  { id: 'love', name: 'LOVE (Lua)', note: 'Makes a LOVE 11 project. Run it with the LOVE app.',
+    spec: 'LOVE 11.x in Lua. Files: main.lua, conf.lua (window size and orientation for mobile), and optional modules. Touch through love.touchpressed, love.touchmoved, and love.touchreleased. Graphics with love.graphics primitives and no asset files. README.md: how to run it.' },
+  { id: 'pygame', name: 'Python (pygame)', note: 'Makes a pygame project. Run it wherever Python runs.',
+    spec: 'Python 3 with pygame-ce. Files: main.py, requirements.txt, and README.md. Fixed timestep loop, keyboard and mouse input.' }
+];
+
+var B = { target: 'web', files: [], sel: 0, id: null, req: null, busy: false, raw: '', prompt: '', note: '' };
+var builds = load('forge.builds', []);
+var EMPTY_BUILD = '<div class="empty"><h2>Describe it, then play it.</h2><p>Web builds run right here. Godot, Unity, Unreal, and Blender builds give you the scripts and project files to open in that tool.</p></div>';
+
+function targetById(id) {
+  for (var i = 0; i < TARGETS.length; i++) { if (TARGETS[i].id === id) { return TARGETS[i]; } }
+  return TARGETS[0];
+}
+function baseName(n) { var p = String(n).split('/'); return p[p.length - 1]; }
+
+function buildSystem(t) {
+  var s = 'You are a senior game and app developer working inside a phone-based studio. Write complete, working code for exactly what the user asks, with a clean structure and short helpful comments. TARGET: ' + t.spec + ' ';
+  if (t.id === 'web' && $('acodeSafe').checked) { s += ACODE_RULES + ' '; }
+  s += 'OUTPUT FORMAT (strict): reply with file blocks only and no text outside them. Start each file with a line "=== FILE: path/name.ext ===" followed by the full contents of that file. ' +
+    'When changing an existing project, keep everything that already works, change only what was asked, and output every file in full again, including unchanged ones. Never output diffs or placeholders. ' +
+    (t.id === 'web' ? 'Skip README.md for a single index.html.' : 'Put short setup and run steps in README.md.');
+  return s;
+}
+
+function serializeFiles(files) {
+  var out = [];
+  each(files, function (f) { out.push('=== FILE: ' + f.name + ' ===\n' + f.text); });
+  return out.join('\n');
+}
+function cleanName(n) {
+  var t = trim(n).replace(/\\/g, '/').replace(/^\/+/, '').replace(/(^|\/)\.\.(?=\/|$)/g, '$1').replace(/\/{2,}/g, '/');
+  return t || 'file.txt';
+}
+function stripFence(b) {
+  var t = b.replace(/^\s+/, '');
+  if (t.indexOf('```') === 0) {
+    var nl = t.indexOf('\n');
+    t = nl > -1 ? t.substring(nl + 1) : '';
+    var last = t.lastIndexOf('```');
+    if (last > -1) { t = t.substring(0, last); }
+    return t;
+  }
+  return b;
+}
+function dropTrailingFence(b) {
+  var n = b.split('```').length - 1;
+  if (n % 2 === 1 && /\n```\s*$/.test(b)) { return b.replace(/\n```\s*$/, '\n'); }
+  return b;
+}
+function parseFiles(text) {
+  var files = [], marks = [], re = /^=== FILE:[ \t]*(.+?)[ \t]*===[ \t]*$/gm, m;
+  while ((m = re.exec(text)) !== null) { marks.push({ name: m[1], start: m.index, end: re.lastIndex }); }
+  for (var i = 0; i < marks.length; i++) {
+    var body = text.substring(marks[i].end, i + 1 < marks.length ? marks[i + 1].start : text.length);
+    body = dropTrailingFence(stripFence(body.replace(/^\r?\n/, '')));
+    files.push({ name: cleanName(marks[i].name), text: body.replace(/\s+$/, '') + '\n' });
+  }
+  if (!files.length) {
+    var fb = /```[a-zA-Z0-9]*\n([\s\S]*?)```/.exec(text);
+    if (fb && trim(fb[1])) { files.push({ name: B.target === 'web' ? 'index.html' : 'output.txt', text: fb[1].replace(/\s+$/, '') + '\n' }); }
+  }
+  return files;
+}
+function pickMain(files) {
+  var i;
+  for (i = 0; i < files.length; i++) { if (/(^|\/)index\.html?$/i.test(files[i].name)) { return i; } }
+  for (i = 0; i < files.length; i++) { if (/\.html?$/i.test(files[i].name)) { return i; } }
+  return 0;
+}
+
+function renderTargets() {
+  var box = $('tgtChips');
+  box.innerHTML = '';
+  each(TARGETS, function (t) {
+    var c = mk('button', 'chip' + (t.id === B.target ? ' on' : ''), esc(t.name)); c.type = 'button';
+    on(c, 'click', function () {
+      if (B.busy || t.id === B.target) { return; }
+      B.target = t.id;
+      if (B.files.length) {
+        B.files = []; B.id = null; B.note = '';
+        renderViewer(); syncBuildUI();
+        toast('New project for ' + t.name + '. Your last build is saved below.');
+      }
+      var engine = t.id !== 'web';
+      $('maxEffort').checked = engine;
+      setOptions($('bldProv'), modelOptions(), engine ? S.bestModel : S.buildModel);
+      renderTargets();
+    });
+    box.appendChild(c);
+  });
+  $('tgtNote').textContent = targetById(B.target).note;
+  $('acodeWrap').style.display = B.target === 'web' ? '' : 'none';
+}
+function syncBuildUI() {
+  var has = B.files.length > 0;
+  $('bldGo').textContent = has ? 'Update build' : 'Build it';
+  $('bldLabel').textContent = has ? 'What should change?' : 'What should it do?';
+  $('bldReset').style.display = has ? '' : 'none';
+  $('bldPrompt').placeholder = has ? 'Make the jump higher and add a score counter.' : 'A one-button runner where a paper crane dodges storm clouds. Tap to flap. Score at the top.';
+}
+
+function buildJobPanel() {
+  var box = $('bldOut');
+  box.innerHTML = '';
+  var pn = mk('div', 'panel job slam');
+  pn.innerHTML = '<div class="jobbody"><strong>Building</strong><div class="js">Sending your brief\u2026</div><div class="stripe"></div></div><pre class="code stream" style="display:none"></pre><div class="pbtns"><button type="button" class="jstop">Stop</button></div>';
+  box.appendChild(pn);
+  reveal(pn);
+  return pn;
+}
+function buildFail(pn, msg) {
+  B.busy = false; setBusy($('bldGo'), false); syncBuildUI();
+  failPanel(pn, 'Build failed', msg);
+  pn.className = 'panel';
+  on(pn.querySelector('button'), 'click', function () { renderViewer(); });
+}
+
+function makeBuildUI(pn) {
+  var ui = { t: 0, text: '', lineLabel: null, abortFn: null };
+  ui.status = function (label) { pn.querySelector('.js').textContent = label; };
+  ui.clear = function () { if (ui.t) { clearTimeout(ui.t); ui.t = 0; } };
+  ui.begin = function (label, lineLabel) {
+    ui.clear(); ui.text = ''; ui.lineLabel = lineLabel || null;
+    ui.status(label);
+    var pre = pn.querySelector('pre');
+    pre.style.display = 'none'; pre.textContent = '';
+  };
+  ui.stream = function (full) {
+    ui.text = full;
+    if (ui.t) { return; }
+    ui.t = setTimeout(function () {
+      ui.t = 0;
+      var lines = ui.text.split('\n');
+      if (ui.lineLabel) { ui.status(ui.lineLabel + ' ' + lines.length + ' lines'); }
+      var pre = pn.querySelector('pre');
+      pre.style.display = 'block';
+      pre.textContent = lines.slice(-28).join('\n');
+      pre.scrollTop = pre.scrollHeight;
+    }, 150);
+  };
+  on(pn.querySelector('.jstop'), 'click', function () { if (ui.abortFn) { ui.abortFn(); } });
+  return ui;
+}
+
+/* one model call for one step. cb(error, fullText, state, aborted) */
+function runStep(spec, system, user, opts, ui, label, lineLabel, cb) {
+  ui.begin(label, lineLabel);
+  return streamChat(spec, system, [{ role: 'user', content: user }], opts.maxTokens || 32000, {
+    onText: function (d, full) { ui.stream(full); },
+    onDone: function (st) { ui.clear(); cb(null, st.text, st, false); },
+    onError: function (msg, st, aborted) { ui.clear(); cb(msg, st.text, st, aborted); }
+  }, { effort: opts.effort });
+}
+
+function planSystem(t) {
+  return 'You are a principal engineer planning a build inside a phone-based studio. TARGET: ' + t.spec + ' ' +
+    'Write the implementation plan that the coder will follow exactly. Cover: (1) the complete file list, one line per file on its job; ' +
+    '(2) the exact engine APIs, classes, nodes, and functions you will rely on, using only names that really exist in this engine version, plus version-specific traps to avoid; ' +
+    '(3) how state and data flow between files; (4) how input works on a touch screen; (5) the step-by-step setup the user must do in the editor. ' +
+    'Be concrete and compact. Do not write code.';
+}
+function reviewSystem(t) {
+  return 'You are a meticulous senior reviewer who compiles and runs code in your head. TARGET: ' + t.spec + ' ' +
+    'Check the files against the brief and the plan. Find every defect that would stop the project from compiling, loading, or running correctly: syntax errors, wrong or non-existent API names or signatures for this engine version, missing imports or includes, bad node paths or references, type errors, logic bugs, features from the brief that are missing, and touch-input problems. Ignore style. ' +
+    'If there are no such defects, reply with exactly: NO ISSUES. Otherwise reply with a numbered list where each item names the file, quotes the exact snippet, explains why it is wrong, and gives the fix.';
+}
+function isClean(text) { return /^\W*NO ISSUES\W*$/i.test(text) || /^NO ISSUES\b/i.test(text); }
+
+var MAX_ROUNDS = 2;
+/* plan, write, then review and fix up to MAX_ROUNDS times. done(error, files, note, stopped) */
+function maxPipeline(spec, t, request, ui, done) {
+  var brief = B.files.length
+    ? 'CURRENT FILES:\n' + serializeFiles(B.files) + '\n\nCHANGE REQUEST:\n' + request
+    : 'BRIEF:\n' + request;
+  var plan = '', files = null, notes = [], stopped = false, cur = null, effort = 'xhigh';
+
+  function go(label, lineLabel, system, user, maxTokens, cb) {
+    cur = runStep(spec, system, user, { maxTokens: maxTokens, effort: effort }, ui, label, lineLabel, function (err, text, st, aborted) {
+      if (aborted) { stopped = true; }
+      cb(err, text, st, aborted);
+    });
+    ui.abortFn = function () { stopped = true; if (cur) { cur.abort(); } };
+  }
+  function end(err) {
+    if (stopped && files) { notes.push('you stopped it early'); }
+    done(err || null, files, notes.length ? 'Max effort: ' + notes.join(', ') + '.' : '', stopped);
+  }
+  function planStep() {
+    go('Planning the design\u2026', null, planSystem(t), brief, 16000, function (err, text, st, aborted) {
+      if (aborted) { end(null); return; }
+      if (err && !trim(text)) { end(err); return; }
+      plan = trim(text);
+      notes.push('planned the design');
+      writeStep();
+    });
+  }
+  function writeStep() {
+    var user = brief + (plan ? '\n\nPLAN TO FOLLOW:\n' + plan : '');
+    go('Writing the files\u2026', 'Writing code\u2026', buildSystem(t) + ' Follow the plan exactly.', user, 32000, function (err, text, st, aborted) {
+      if (aborted || err) { end(aborted ? null : err); return; }
+      var parsed = parseFiles(text);
+      if (!parsed.length) {
+        end(st.refused ? 'The model declined this request. Try rewording it.' : 'No files came back. Try again, or make the request more specific.');
+        return;
+      }
+      files = parsed;
+      notes.push('wrote ' + files.length + (files.length === 1 ? ' file' : ' files'));
+      reviewStep(1);
+    });
+  }
+  function reviewStep(round) {
+    go(round === 1 ? 'Checking the code\u2026' : 'Checking the fixes\u2026', null, reviewSystem(t),
+      brief + (plan ? '\n\nPLAN:\n' + plan : '') + '\n\nFILES:\n' + serializeFiles(files), 16000,
+      function (err, text, st, aborted) {
+        if (aborted) { end(null); return; }
+        if (err) { notes.push('the review could not finish'); end(null); return; }
+        var findings = trim(text);
+        if (!findings || isClean(findings)) { notes.push(round === 1 ? 'review found no issues' : 'second review found no issues'); end(null); return; }
+        notes.push(round === 1 ? 'review found issues' : 'second review found more issues');
+        fixStep(round, findings);
+      });
+  }
+  function fixStep(round, findings) {
+    go('Fixing the issues\u2026', 'Writing code\u2026',
+      buildSystem(t) + ' You are repairing existing code: fix every review finding, keep everything else unchanged, and output every file in full.',
+      'CURRENT FILES:\n' + serializeFiles(files) + '\n\nREVIEW FINDINGS:\n' + findings + '\n\n' + brief, 32000,
+      function (err, text, st, aborted) {
+        var parsed = (!err && !aborted) ? parseFiles(text) : [];
+        if (!parsed.length) { notes.push('a fix pass did not finish, so the last checked version is kept'); end(null); return; }
+        files = parsed;
+        notes.push('fixed them');
+        if (round < MAX_ROUNDS) { reviewStep(round + 1); } else { end(null); }
+      });
+  }
+  planStep();
+}
+
+function makeBuild() {
+  if (B.busy) { return; }
+  var p = trim($('bldPrompt').value);
+  if (!p) { toast('Describe what to build first.'); return; }
+  var spec = $('bldProv').value;
+  if (B.target === 'web') { S.buildModel = spec; } else { S.bestModel = spec; }
+  save('forge.settings', S);
+  if (!specReady(spec)) { needSpec(spec); return; }
+  var t = targetById(B.target);
+  B.busy = true; B.prompt = p; B.note = '';
+  setBusy($('bldGo'), true, 'Building\u2026');
+  var pn = buildJobPanel();
+  var ui = makeBuildUI(pn);
+
+  function complete(err, files, note, stopped) {
+    ui.clear();
+    if (!files || !files.length) {
+      if (stopped) { B.busy = false; setBusy($('bldGo'), false); syncBuildUI(); renderViewer(); toast('Stopped.'); return; }
+      buildFail(pn, err || 'No files came back. Try again, or make the request more specific.');
+      return;
+    }
+    B.files = files; B.sel = pickMain(files); B.note = note || '';
+    B.busy = false; setBusy($('bldGo'), false);
+    saveBuild(p);
+    $('bldPrompt').value = '';
+    syncBuildUI(); renderViewer(); renderSaved(); reveal($('bldOut'));
+    toast('Build ready.');
+  }
+
+  if ($('maxEffort').checked) {
+    maxPipeline(spec, t, p, ui, complete);
+    return;
+  }
+  var content = B.files.length ? 'CURRENT FILES:\n' + serializeFiles(B.files) + '\n\nCHANGE REQUEST:\n' + p : 'BRIEF:\n' + p;
+  var ctl = runStep(spec, buildSystem(t), content, { maxTokens: 32000 }, ui, 'Sending your brief\u2026', 'Writing code\u2026', function (err, text, st, aborted) {
+    if (aborted) { complete(null, null, '', true); return; }
+    if (err) { complete(err, null, '', false); return; }
+    var files = parseFiles(text);
+    if (!files.length) { complete(st.refused ? 'The model declined this request. Try rewording it.' : null, null, '', false); return; }
+    complete(null, files, st.cut ? 'The reply hit the length limit, so the last file may be cut off.' : '', false);
+  });
+  ui.abortFn = function () { ctl.abort(); };
+}
+
+function renderViewer() {
+  var box = $('bldOut');
+  if (!B.files.length) { box.innerHTML = EMPTY_BUILD; return; }
+  if (B.sel >= B.files.length) { B.sel = 0; }
+  var v = mk('div', 'panel slam');
+  var chips = mk('div', 'files');
+  each(B.files, function (f, i) {
+    var c = mk('button', 'chip' + (i === B.sel ? ' on' : ''), esc(f.name)); c.type = 'button';
+    on(c, 'click', function () { B.sel = i; renderViewer(); });
+    chips.appendChild(c);
+  });
+  v.appendChild(chips);
+  var pre = mk('pre', 'code codeview');
+  pre.textContent = B.files[B.sel].text;
+  v.appendChild(pre);
+  var bt = mk('div', 'pbtns');
+  if (B.target === 'web') { addBtn(bt, 'Play', openPreview, true); }
+  addBtn(bt, 'Copy', function () { copyText(B.files[B.sel].text); });
+  addBtn(bt, 'Save', function () {
+    var f = B.files[B.sel];
+    saveBlob(new Blob([f.text], { type: /\.html?$/i.test(f.name) ? 'text/html' : 'text/plain' }), baseName(f.name));
+  });
+  if (B.files.length > 1) {
+    addBtn(bt, 'Zip', function () { saveBlob(makeZip(B.files), 'forge-' + slug(B.prompt || 'project') + '.zip'); });
+  }
+  v.appendChild(bt);
+  if (B.note) { v.appendChild(mk('div', 'notes', esc(B.note))); }
+  box.innerHTML = '';
+  box.appendChild(v);
+}
+
+/* ---------- saved builds ---------- */
+function saveBuild(prompt) {
+  var rec = null;
+  if (B.id) { each(builds, function (b) { if (b.id === B.id) { rec = b; } }); }
+  if (!rec) {
+    rec = { id: 'b' + nowMs(), title: trim(prompt).substring(0, 48) || 'Untitled build' };
+    builds.unshift(rec);
+    B.id = rec.id;
+  }
+  rec.target = B.target; rec.files = B.files; rec.note = B.note; rec.ts = nowMs();
+  if (builds.length > 15) { builds.length = 15; }
+  if (!save('forge.builds', builds)) { toast('This browser has no room to keep the build. Use Zip or Save to keep it.'); }
+}
+function renderSaved() {
+  renderPlaySaved();
+  var box = $('bldSaved');
+  box.innerHTML = '';
+  if (!builds.length) { return; }
+  box.appendChild(mk('h3', '', 'Saved builds'));
+  each(builds, function (b) {
+    var row = mk('div', 'panel');
+    row.appendChild(mk('div', 'ttl', esc(b.title) + '<small>' + esc(targetById(b.target).name) + ', ' + b.files.length + (b.files.length === 1 ? ' file' : ' files') + '</small>'));
+    var open = mk('button', 'btn small primary', 'Open'); open.type = 'button';
+    var del = mk('button', 'btn small', 'Delete'); del.type = 'button';
+    on(open, 'click', function () {
+      if (B.busy) { return; }
+      B.target = b.target; B.files = b.files; B.sel = pickMain(b.files); B.id = b.id; B.prompt = b.title; B.note = b.note || '';
+      renderTargets(); syncBuildUI(); renderViewer();
+      $('v-build').scrollTop = 0;
+      toast('Opened ' + b.title + '.');
+    });
+    on(del, 'click', function () {
+      confirmSheet('Delete this build?', b.title, 'Delete', function () {
+        for (var i = 0; i < builds.length; i++) { if (builds[i].id === b.id) { builds.splice(i, 1); break; } }
+        if (B.id === b.id) { B.id = null; }
+        save('forge.builds', builds);
+        renderSaved();
+      });
+    });
+    row.appendChild(open); row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+
+/* ---------- live preview (sandboxed iframe) ---------- */
+var pvMsg = '';
+function findFile(files, ref) {
+  var r = String(ref).replace(/[?#].*$/, '').replace(/^\.\//, '').replace(/^\//, '');
+  for (var i = 0; i < files.length; i++) {
+    if (files[i].name === r || baseName(files[i].name) === baseName(r)) { return files[i]; }
+  }
+  return null;
+}
+function webHtml(files) {
+  var main = files[pickMain(files)];
+  if (!main || !/\.html?$/i.test(main.name)) { return ''; }
+  var html = main.text;
+  html = html.replace(/<script[^>]*\ssrc=["']([^"']+)["'][^>]*>\s*<\/script>/gi, function (m, src) {
+    var f = findFile(files, src);
+    return f ? '<script>' + f.text.replace(/<\/script/gi, '<\\/script') + '<\/script>' : m;
+  });
+  html = html.replace(/<link[^>]*href=["']([^"']+\.css)["'][^>]*>/gi, function (m, href) {
+    var f = findFile(files, href);
+    return f ? '<style>' + f.text + '</style>' : m;
+  });
+  return html;
+}
+var PROBE = '<script>window.onerror=function(m,s,l){try{parent.postMessage({forge:"err",msg:String(m)+(l?" (line "+l+")":"")},"*")}catch(e){}};' +
+  'window.addEventListener("unhandledrejection",function(e){try{parent.postMessage({forge:"err",msg:String(e.reason)},"*")}catch(x){}});<\/script>';
+function withProbe(html) {
+  var m = /<head[^>]*>/i.exec(html);
+  if (!m) { m = /<html[^>]*>/i.exec(html); }
+  if (m) { var i = m.index + m[0].length; return html.substring(0, i) + PROBE + html.substring(i); }
+  return PROBE + html;
+}
+function openPreview() {
+  var html = webHtml(B.files);
+  if (!html) { toast('There is no HTML file to play.'); return; }
+  $('pvErr').className = 'pv-err'; pvMsg = '';
+  $('toast').className = '';
+  $('pv').className = 'pv on';
+  $('pvFrame').srcdoc = withProbe(html);
+}
+function restartPreview() {
+  var html = webHtml(B.files), fr = $('pvFrame');
+  if (!html) { return; }
+  $('pvErr').className = 'pv-err'; pvMsg = '';
+  fr.srcdoc = '';
+  setTimeout(function () { fr.srcdoc = withProbe(html); }, 80);
+}
+function closePreview() { $('pv').className = 'pv'; $('pvFrame').srcdoc = ''; }
+
+/* ---------- zip (store only, no compression, no libraries) ---------- */
+var crcTable = null;
+function crc32(bytes) {
+  if (!crcTable) {
+    crcTable = [];
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) { c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); }
+      crcTable[n] = c >>> 0;
+    }
+  }
+  var crc = 0xFFFFFFFF;
+  for (var i = 0; i < bytes.length; i++) { crc = crcTable[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8); }
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+function utf8(s) {
+  var bin = unescape(encodeURIComponent(s)), out = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) { out[i] = bin.charCodeAt(i); }
+  return out;
+}
+function le16(n) { return [n & 255, (n >>> 8) & 255]; }
+function le32(n) { return [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]; }
+function makeZip(files) {
+  var parts = [], central = [], offset = 0, cdSize = 0;
+  each(files, function (f) {
+    var name = utf8(f.name), data = utf8(f.text), crc = crc32(data);
+    var lh = [0x50, 0x4b, 0x03, 0x04].concat(le16(20), le16(0x0800), le16(0), le16(0), le16(0x21), le32(crc), le32(data.length), le32(data.length), le16(name.length), le16(0));
+    parts.push(new Uint8Array(lh), name, data);
+    var ch = [0x50, 0x4b, 0x01, 0x02].concat(le16(20), le16(20), le16(0x0800), le16(0), le16(0), le16(0x21), le32(crc), le32(data.length), le32(data.length), le16(name.length), le16(0), le16(0), le16(0), le16(0), le32(0), le32(offset));
+    central.push(new Uint8Array(ch), name);
+    offset += lh.length + name.length + data.length;
+    cdSize += ch.length + name.length;
+  });
+  var end = [0x50, 0x4b, 0x05, 0x06].concat(le16(0), le16(0), le16(files.length), le16(files.length), le32(cdSize), le32(offset), le16(0));
+  return new Blob(parts.concat(central, [new Uint8Array(end)]), { type: 'application/zip' });
+}
+
+/* ================= wire everything up ================= */
+function bindSeg(id, cb) {
+  var box = $(id);
+  on(box, 'click', function (e) {
+    var t = e.target;
+    while (t && t !== box && t.tagName !== 'BUTTON') { t = t.parentNode; }
+    if (!t || t === box) { return; }
+    each(box.querySelectorAll('.chip'), function (c) { c.className = 'chip' + (c === t ? ' on' : ''); });
+    cb(t.getAttribute('data-v'));
+  });
+}
+
+function init() {
+  window.onerror = function (m) { toast('Forge hit an error: ' + m); };
+  refreshLabels();
+  renderTargets(); renderStart(); renderSaved(); syncBuildUI(); renderViewer(); renderChat(true);
+  checkPuter();
+  initPlay();
+
+  each(document.querySelectorAll('#tabs button'), function (b) { on(b, 'click', function () { go(b.getAttribute('data-go')); }); });
+  each(document.querySelectorAll('#composer .chip'), function (b) {
+    on(b, 'click', function () {
+      var kind = b.getAttribute('data-go'), text = trim($('chatIn').value);
+      if (text) {
+        if (kind === 'image') { $('imgPrompt').value = text; }
+        else if (kind === 'video') { $('vidPrompt').value = text; }
+        else { $('bldPrompt').value = text; }
+      }
+      go(kind);
+    });
+  });
+
+  on($('btnSettings'), 'click', openSettings);
+  on($('setClose'), 'click', closeSettings);
+  on($('setSave'), 'click', saveSettings);
+  on($('setWipe'), 'click', wipeAll);
+  on($('s-show'), 'change', function () { togglePw($('s-show').checked); });
+  on($('askNo'), 'click', closeAsk);
+  on($('askYes'), 'click', function () { var f = askYes; closeAsk(); if (f) { f(); } });
+
+  on($('chatProv'), 'change', function () { S.chatModel = $('chatProv').value; save('forge.settings', S); });
+  on($('chatNew'), 'click', newChat);
+  on($('chatSend'), 'click', function () { if (chatBusy) { if (chatReq) { chatReq.abort(); } } else { sendChat(); } });
+  on($('chatIn'), 'input', function () { autoGrow($('chatIn')); });
+  on($('chatIn'), 'focus', function () { setTimeout(function () { var l = $('chatlog'); l.scrollTop = l.scrollHeight; }, 300); });
+  on($('chatIn'), 'keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendChat(); } });
+  on($('chatlog'), 'click', function (e) {
+    var t = e.target;
+    if (t && t.className === 'copy') { var pre = t.parentNode.querySelector('pre'); if (pre) { copyText(pre.textContent); } }
+  });
+
+  bindSeg('imgShape', function (v) { imgShape = v; });
+  bindSeg('vidShape', function (v) { vidShape = v; });
+  on($('imgProv'), 'change', function () { S.imageProvider = $('imgProv').value; save('forge.settings', S); });
+  on($('bldProv'), 'change', function () {
+    if (B.target === 'web') { S.buildModel = $('bldProv').value; } else { S.bestModel = $('bldProv').value; }
+    save('forge.settings', S);
+  });
+  on($('vidProv'), 'change', function () { S.videoProvider = $('vidProv').value; save('forge.settings', S); syncVideoUI(); });
+  bindSeg('vidLen', function (v) { vidLen = parseInt(v, 10) || 4; });
+  on($('puterSignIn'), 'click', function () { if (puterStatus === 'blocked') { checkPuter(); } else { signInPuter(); } });
+  on($('puterSignOut'), 'click', signOutPuter);
+  on($('puterTest'), 'click', function () { netTest($('puterNet')); });
+  on($('imgImprove'), 'click', function () { improvePrompt('image', $('imgPrompt'), $('imgImprove')); });
+  on($('vidImprove'), 'click', function () { improvePrompt('video', $('vidPrompt'), $('vidImprove')); });
+  on($('imgGo'), 'click', makeImage);
+  on($('vidGo'), 'click', makeVideo);
+  on($('bldGo'), 'click', makeBuild);
+  on($('bldReset'), 'click', function () {
+    if (B.busy) { return; }
+    B.files = []; B.id = null;
+    renderViewer(); syncBuildUI();
+    toast('Started a new project. The last one is saved below.');
+  });
+  on($('vidFile'), 'change', function () {
+    var input = $('vidFile'), f = input.files && input.files[0];
+    if (!f) { return; }
+    if (f.size > 6 * 1024 * 1024) { toast('Pick an image under 6 MB.'); input.value = ''; return; }
+    var rd = new FileReader();
+    rd.onload = function () {
+      var res = String(rd.result), i = res.indexOf(',');
+      vidStart = { mime: f.type || 'image/png', b64: res.substring(i + 1) };
+      renderStart();
+    };
+    rd.readAsDataURL(f);
+    input.value = '';
+  });
+
+  on(document, 'keydown', function (e) {
+    if (e.key !== 'Escape') { return; }
+    if ($('ask').className.indexOf(' on') > -1) { closeAsk(); }
+    else if ($('rn').className.indexOf(' on') > -1) { closeRunner(); }
+    else if ($('pv').className.indexOf(' on') > -1) { closePreview(); }
+    else if ($('sheet').className.indexOf(' on') > -1) { closeSettings(); }
+  });
+  on($('pvClose'), 'click', closePreview);
+  on($('pvReload'), 'click', restartPreview);
+  on($('pvDismiss'), 'click', function () { $('pvErr').className = 'pv-err'; });
+  on($('pvFix'), 'click', function () {
+    var m = pvMsg;
+    closePreview();
+    $('bldPrompt').value = 'Fix this runtime error and make sure the game runs: ' + m;
+    go('build');
+    makeBuild();
+  });
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.forge !== 'err' || e.source !== $('pvFrame').contentWindow) { return; }
+    pvMsg = String(d.msg).substring(0, 400);
+    $('pvMsg').textContent = 'The build hit an error: ' + pvMsg;
+    $('pvErr').className = 'pv-err on';
+  }, false);
+}
+
+init();
+})();
+</script>
+</body>
+</html>
